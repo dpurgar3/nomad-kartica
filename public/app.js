@@ -166,13 +166,13 @@
     scanBusy = false;
   }
 
-  $('photo').addEventListener('change', async e => {
+  if ($('photo')) $('photo').addEventListener('change', async e => {
     const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
-    $('sErr').textContent = ''; $('sBusy').hidden = false;
+    $('sErr').textContent = ''; if ($('sBusy')) $('sBusy').hidden = false;
     stopScanner();
     try { const text = await decodeImageFile(f, 'reader2'); scanBusy = false; await onScan(text); }
     catch (err) { $('sErr').textContent = err.message; }
-    finally { $('sBusy').hidden = true; if (!$('vScan').classList.contains('hidden') && !scanner) startScanner(); }
+    finally { if ($('sBusy')) $('sBusy').hidden = true; if (!$('vScan').classList.contains('hidden') && !scanner) startScanner(); }
   });
 
   // ---------- Akcije ----------
