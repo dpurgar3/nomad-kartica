@@ -1,0 +1,22 @@
+{
+  "name": "nomad-kartica",
+  "version": "1.0.0",
+  "description": "NOMAd Caffe Bar – kartica vjernosti",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.2.1",
+    "html5-qrcode": "^2.3.8",
+    "qrcode": "^1.5.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
