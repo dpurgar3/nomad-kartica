@@ -110,12 +110,36 @@
   }
 
   // ---------- Skener ----------
+  // Čitanje QR koda s fotografije: probaj cijelu sliku pa izreske (mali QR na velikoj fotografiji).
+  async function decodeImageFile(file, readerId) {
+    const bmp = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = URL.createObjectURL(file); });
+    const W = bmp.naturalWidth, H = bmp.naturalHeight;
+    const cands = [[0, 0, W, H, 1600], [0, 0, W, H, 1000]];
+    for (const f of [0.6, 0.4]) {
+      const w = Math.round(W * f), h = Math.round(H * f);
+      for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) cands.push([Math.round((W - w) * i / 2), Math.round((H - h) * j / 2), w, h, 900]);
+    }
+    const detector = ('BarcodeDetector' in window) ? await (async () => { try { const f = await BarcodeDetector.getSupportedFormats(); return f.includes('qr_code') ? new BarcodeDetector({ formats: ['qr_code'] }) : null; } catch { return null; } })() : null;
+    const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d', { willReadFrequently: true });
+    for (const [x, y, w, h, max] of cands) {
+      const s = Math.min(1, max / Math.max(w, h));
+      canvas.width = Math.round(w * s); canvas.height = Math.round(h * s);
+      ctx.drawImage(bmp, x, y, w, h, 0, 0, canvas.width, canvas.height);
+      try {
+        if (detector) { const r = await detector.detect(canvas); if (r.length) return r[0].rawValue; continue; }
+        const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.92));
+        const sc = new Html5Qrcode(readerId, { verbose: false });
+        try { return await sc.scanFile(new File([blob], 'qr.jpg', { type: 'image/jpeg' }), false); } finally { try { sc.clear(); } catch {} }
+      } catch {}
+    }
+    throw new Error('Na fotografiji nisam pronašao QR kod. Slikaj izbliza, da kod bude oštar i cijeli u kadru.');
+  }
   async function startScanner() {
     $('sErr').textContent = '';
     if (!window.Html5Qrcode) { $('sErr').textContent = 'Skener se nije učitao. Osvježi stranicu.'; return; }
     try {
-      scanner = new Html5Qrcode('reader', { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], verbose: false });
-      await scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: (w, h) => { const s = Math.floor(Math.min(w, h) * 0.7); return { width: s, height: s }; } }, onScan, () => {});
+      scanner = new Html5Qrcode('reader', { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], verbose: false, experimentalFeatures: { useBarCodeDetectorIfSupported: true } });
+      await scanner.start({ facingMode: 'environment' }, { fps: 15, qrbox: (w, h) => { const s = Math.floor(Math.min(w, h) * 0.8); return { width: s, height: s }; }, videoConstraints: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } }, onScan, () => {});
     } catch (e) {
       $('sErr').textContent = 'Kamera nije dostupna. Dopusti pristup kameri u postavkama preglednika.';
       scanner = null;
@@ -141,6 +165,15 @@
     }
     scanBusy = false;
   }
+
+  $('photo').addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
+    $('sErr').textContent = ''; $('sBusy').hidden = false;
+    stopScanner();
+    try { const text = await decodeImageFile(f, 'reader2'); scanBusy = false; await onScan(text); }
+    catch (err) { $('sErr').textContent = err.message; }
+    finally { $('sBusy').hidden = true; if (!$('vScan').classList.contains('hidden') && !scanner) startScanner(); }
+  });
 
   // ---------- Akcije ----------
   async function refresh() {
