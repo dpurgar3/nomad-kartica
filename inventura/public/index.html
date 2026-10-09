@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0B0A08">
+<title>Inventura · NOMAd</title>
+<link rel="icon" href="/logo-96.png">
+<link rel="stylesheet" href="/inventura/app.css">
+</head>
+<body>
+<div id="login" class="login hidden">
+  <form class="login-box" id="loginForm" autocomplete="off">
+    <img src="/logo-192.png" alt="" width="72" height="72">
+    <h1>Inventura</h1>
+    <p class="muted" id="loginHint">Upiši svoj PIN.</p>
+    <div id="setupFields" class="hidden">
+      <label>Ime<input name="name" value="Dražen" maxlength="40"></label>
+      <label>PIN osoblja (ADMIN_PIN kartice)<input name="adminPin" type="password" inputmode="numeric"></label>
+      <label>Novi osobni PIN za inventuru (4–12 znamenki)<input name="newPin" type="password" inputmode="numeric"></label>
+    </div>
+    <div id="pinField"><input name="pin" type="password" inputmode="numeric" placeholder="PIN" aria-label="PIN" autofocus></div>
+    <button class="btn primary" type="submit" id="loginBtn">Prijava</button>
+    <p class="err" id="loginErr" role="alert"></p>
+  </form>
+</div>
+
+<div id="app" class="hidden">
+  <header class="topbar">
+    <button class="menu-btn" id="menuBtn" aria-label="Izbornik">☰</button>
+    <a class="logo" href="#/"><img src="/logo-96.png" alt="" width="32" height="32"><span>NOMAd <b>Inventura</b></span></a>
+    <span class="loc" id="locName"></span>
+  </header>
+  <nav class="side" id="side">
+    <a href="#/" data-r="">Nadzorna ploča</a>
+    <a href="#/artikli" data-r="artikli">Artikli</a>
+    <a href="#/kategorije" data-r="kategorije">Kategorije</a>
+    <a href="#/promjene" data-r="promjene">Promjene zaliha</a>
+    <a href="#/nova-inventura" data-r="nova-inventura">Nova inventura</a>
+    <a href="#/povijest" data-r="povijest">Povijest inventura</a>
+    <a href="#/izvjestaji" data-r="izvjestaji">Izvještaji</a>
+    <a href="#/postavke" data-r="postavke">Postavke</a>
+    <button class="link" id="logoutBtn">Odjava</button>
+  </nav>
+  <main id="view" tabindex="-1"></main>
+</div>
+
+<dialog id="dlg"><form method="dialog" id="dlgForm"></form></dialog>
+<div id="toast" class="toast" role="status"></div>
+<script src="/inventura/voice.js"></script>
+<script src="/inventura/app.js"></script>
+</body>
+</html>
