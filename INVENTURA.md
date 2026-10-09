@@ -30,6 +30,31 @@ Web-aplikacija za inventuru, prilagođena Remarisu. Radi na istom serveru kao ka
   - dnevnik promjena;
   - CSV za Excel (separator `;`, decimalni zarez, UTF-8).
 
+## Normativi, uvoz prodaje i kontrola utroška (verzija 2)
+
+- **Normativi** (127, iz Remaris izvoza): za svaku prodanu porciju koliko se troši sastojaka. Podržani su poluproizvodi i normativi unutar normativa (npr. espresso unutar kave s mlijekom); kružne ovisnosti se odbijaju.
+  - Izmjena stvara **novu verziju s datumom početka važenja**. Stare verzije se ne mijenjaju, a prodaja se računa po verziji koja je vrijedila na datum prodaje.
+  - Količina se može upisati u usporedivoj jedinici (8 g kave za artikl u kg). Gubitak pripreme %: potrošnja sirovine = količina × (1 + gubitak).
+  - Remaris izvoz ne sadrži datum od kada normativ vrijedi. Uvezeni normativi zato vrijede od 1.1.2026.
+  - Sastojci kojih nema na skladišnoj listi (npr. Banana, Sirup, Vermouth) dodani su kao *neaktivni* artikli: ulaze u utrošak, ali ne i na listu za inventuru.
+  - Dva sastojka s količinom 0 (Pripravak za vruću čokoladu) izostavljena su, uz napomenu na verziji.
+  - Napomene ⚠ iz izvoza (sumnjive količine, npr. Espresso duga 0,0008 kg) prikazane su uz normativ.
+- **Uvoz prodaje**: Remaris PDF „Promet po artiklima” ili CSV s mapiranjem stupaca (datum, šifra, naziv, količina, broj računa, cijena, iznos), uz pregled prije uvoza i popis pogrešnih redaka.
+  - Kod PDF-a zbroj stavki mora biti jednak „Ukupno artikli” iz izvještaja, inače se uvoz zaustavlja.
+  - Ista datoteka ne može se uvesti dvaput. Razdoblja uvoza za istu lokaciju se ne smiju preklapati. Stavka CSV-a s već uvezenim brojem računa se odbija.
+  - Pogrešan uvoz se ne briše nego **stornira** s razlogom.
+  - Povrati/storna su negativne količine i smanjuju utrošak.
+- **Teorijski utrošak** = Σ prodana količina × normativ.
+  - Prodajni artikl bez normativa, a s istom šifrom kao artikl sa zalihe, troši se 1 : 1.
+  - Prodaja bez normativa i bez takvog artikla prikazuje se zasebno i ne ulazi u utrošak.
+  - Agregirani uvoz (PDF za razdoblje) računa se po verziji normativa važećoj na početku razdoblja, a aplikacija upozorava ako se normativ mijenjao unutar razdoblja.
+  - Uvoz koji samo djelomično pada u odabrano razdoblje se isključuje i navodi.
+- **Kontrola utroška** (između dviju zaključenih inventura, ili početnog stanja i inventure):
+  - stvarni utrošak = početno + nabava upisana u aplikaciji − završno prebrojano;
+  - neobjašnjeno odstupanje = stvarni − teorijski − evidentirani otpis/lom/interno; prikazuje se količina, % i nabavna vrijednost.
+  - To je **druga mjera od inventurnog manjka**, koji uspoređuje prebrojano s knjižnim stanjem.
+  - Usklađenja s Remarisom se ne računaju kao ulaz. Zato nabavu između dviju inventura treba upisati u Promjene zaliha.
+
 ## Početno stanje
 
 Kod prvog pokretanja baza se puni iz `inventura/seed/stanje-2026-10-09.json`:
@@ -104,15 +129,17 @@ Baza inventure je u zasebnoj datoteci `data/inventura.db` (SQLite) pored baze ka
 
 | Sloj | Datoteke |
 |---|---|
-| Prezentacija | `inventura/routes.js` (HTTP API), `inventura/public/` (sučelje), `inventura/csv.js` |
-| Poslovna logika | `inventura/service.js`, `inventura/logic.js`, `inventura/decimal.js`, `inventura/remaris.js`, `inventura/auth.js`, `inventura/public/voice.js` (glasovni unos) |
-| Podaci | `inventura/db.js` (shema i migracije) |
+| Prezentacija | `inventura/routes.js` (HTTP API), `inventura/public/` (sučelje: `app.js`, `utrosak.js`, `voice.js`), `inventura/csv.js` |
+| Poslovna logika | `inventura/service.js`, `inventura/logic.js`, `inventura/decimal.js`, `inventura/remaris.js`, `inventura/auth.js`, `inventura/consumption.js` (normativi, prodaja, utrošak), `inventura/salescsv.js` |
+| Podaci | `inventura/db.js` (shema i migracije 1–2), `inventura/seed/` (početno stanje, normativi) |
 | Testovi | `test/inventura.test.js` |
 
 ## Ograničenja verzije 1
 
-- Prodaja i normativi (receptura) nisu u aplikaciji. Stanje nakon prodaje dolazi uvozom PDF-a iz Remarisa.
+- Knjižno stanje i dalje dolazi uvozom „Skladišna stanja” iz Remarisa. Uvezena prodaja služi za kontrolu utroška, a ne knjiži se na zalihu (inače bi se prodaja brojala dvaput).
+- Primke iz Remarisa još se ne uvoze automatski. Za kontrolu utroška nabavu treba upisati u Promjene zaliha.
+- Vrijednosti u kontroli utroška računaju se po trenutnoj nabavnoj cijeni, a ne po prosjeku razdoblja.
 - Jedan korisnik. Lokacije se mogu dodati, ali sučelje radi s prvom (Glavno), kao skladište u Remarisu.
 - Stope PDV-a nisu bile u Remaris podacima. Mogu se upisati ručno, ali se nigdje ne koriste u izračunu.
-- Uvoz čita samo Remaris PDF „Skladišna stanja” u postojećem rasporedu. Ako Remaris promijeni izgled izvještaja, uvoz treba prilagoditi.
+- Uvoz čita Remaris PDF „Skladišna stanja” i „Promet po artiklima” u postojećem rasporedu. Ako Remaris promijeni izgled izvještaja, uvoz treba prilagoditi.
 - Glasovni unos ovisi o pregledniku i internetu. Firefox ga nema. Prepoznavanje sličnih naziva nije savršeno, zato se svaki unos potvrđuje.
