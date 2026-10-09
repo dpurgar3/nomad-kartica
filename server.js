@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const express = require('express');
 const Database = require('better-sqlite3');
 const QRCode = require('qrcode');
+const { checkReceiptPhoto, getWorker } = require('./receipt-check');
 
 // ---------- Postavke (.env) ----------
 loadEnv(path.join(__dirname, '.env'));
@@ -23,6 +24,8 @@ const CFG = {
   receiptMaxAgeHours: int(process.env.RECEIPT_MAX_AGE_HOURS, 48),
   minReceiptCents: int(process.env.MIN_RECEIPT_CENTS, 0),
   address: process.env.ADDRESS || 'Kulturni centar Ivan Rabuzin, Novi Marof',
+  // OIB izdavatelja: bodove donose samo računi na kojima je otisnut ovaj OIB (Ugostiteljski obrt Artist)
+  oib: (process.env.NOMAD_OIB || '53253782263').replace(/\D/g, ''),
 };
 if (!CFG.adminPin || CFG.adminPin.length < 4) {
   console.warn('UPOZORENJE: ADMIN_PIN nije postavljen (min. 4 znamenke) – ekran za osoblje je isključen.');
@@ -152,7 +155,8 @@ setInterval(() => { const now = Date.now(); for (const [k, a] of hits) if (!a.so
 // ---------- Aplikacija ----------
 const app = express();
 app.set('trust proxy', 1);
-app.use(express.json({ limit: '10kb' }));
+const smallJson = express.json({ limit: '10kb' });
+app.use((req, res, next) => (req.path === '/api/scan' ? next() : smallJson(req, res, next)));
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 app.use('/vendor/html5-qrcode.min.js', (req, res) =>
   res.sendFile(path.join(__dirname, 'node_modules', 'html5-qrcode', 'html5-qrcode.min.js')));
@@ -200,8 +204,14 @@ app.post('/api/login', limit('login', 8, 900e3), (req, res) => {
 
 app.get('/api/me', auth, (req, res) => res.json(meView(req.user)));
 
-app.post('/api/scan', auth, limit('scan', 20, 3600e3), (req, res) => {
-  const r = parseReceipt(req.body.code);
+// Gost šalje FOTOGRAFIJU cijelog računa. Server s iste fotografije čita QR kod i OIB izdavatelja,
+// pa se računi iz drugih trgovina odbijaju.
+app.post('/api/scan', express.json({ limit: '8mb' }), auth, limit('scan', 20, 3600e3), async (req, res) => {
+  const m = String(req.body.image || '').match(/^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/=]+)$/);
+  if (!m) return res.status(400).json({ error: 'Fotografiraj račun i pokušaj ponovno.' });
+  const photo = await checkReceiptPhoto(Buffer.from(m[2], 'base64'), CFG.oib);
+  if (photo.error) return res.status(400).json({ error: photo.error, code: photo.code });
+  const r = parseReceipt(photo.qr);
   if (r.error) return res.status(400).json({ error: r.error });
   const now = Date.now();
   if (r.when.getTime() > now + 3600e3) return res.status(400).json({ error: 'Datum na računu nije ispravan.' });
@@ -306,9 +316,13 @@ app.get('/api/admin/stats', adminAuth, (req, res) => {
   });
 });
 
-app.use((err, req, res, next) => { console.error(err); res.status(500).json({ error: 'Greška na serveru.' }); });
+app.use((err, req, res, next) => {
+  if (err && err.type === 'entity.too.large') return res.status(413).json({ error: 'Fotografija je prevelika. Pokušaj ponovno.' });
+  console.error(err); res.status(500).json({ error: 'Greška na serveru.' });
+});
 
 if (require.main === module) {
   app.listen(CFG.port, () => console.log(`NOMAd kartica radi na http://localhost:${CFG.port}`));
+  getWorker().then(() => console.log('Čitač računa (OCR) je spreman.')).catch(e => console.error('OCR se nije pokrenuo:', e));
 }
 module.exports = { app, parseReceipt, zagrebLocalToDate };

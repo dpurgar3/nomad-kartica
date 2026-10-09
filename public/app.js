@@ -109,49 +109,36 @@
     $('wifiCopy').classList.toggle('hidden', !cfg.wifiPassword);
   }
 
-  // ---------- Skener ----------
-  // Čitanje QR koda s fotografije: probaj cijelu sliku pa izreske (mali QR na velikoj fotografiji).
-  async function decodeImageFile(file, readerId) {
-    const bmp = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = URL.createObjectURL(file); });
-    const W = bmp.naturalWidth, H = bmp.naturalHeight;
-    const cands = [[0, 0, W, H, 1600], [0, 0, W, H, 1000]];
-    for (const f of [0.6, 0.4]) {
-      const w = Math.round(W * f), h = Math.round(H * f);
-      for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) cands.push([Math.round((W - w) * i / 2), Math.round((H - h) * j / 2), w, h, 900]);
-    }
-    const detector = ('BarcodeDetector' in window) ? await (async () => { try { const f = await BarcodeDetector.getSupportedFormats(); return f.includes('qr_code') ? new BarcodeDetector({ formats: ['qr_code'] }) : null; } catch { return null; } })() : null;
-    const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d', { willReadFrequently: true });
-    for (const [x, y, w, h, max] of cands) {
-      const s = Math.min(1, max / Math.max(w, h));
-      canvas.width = Math.round(w * s); canvas.height = Math.round(h * s);
-      ctx.drawImage(bmp, x, y, w, h, 0, 0, canvas.width, canvas.height);
-      try {
-        if (detector) { const r = await detector.detect(canvas); if (r.length) return r[0].rawValue; continue; }
-        const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.92));
-        const sc = new Html5Qrcode(readerId, { verbose: false });
-        try { return await sc.scanFile(new File([blob], 'qr.jpg', { type: 'image/jpeg' }), false); } finally { try { sc.clear(); } catch {} }
-      } catch {}
-    }
-    throw new Error('Na fotografiji nisam pronašao QR kod. Slikaj izbliza, da kod bude oštar i cijeli u kadru.');
-  }
-  async function startScanner() {
-    $('sErr').textContent = '';
-    if (!window.Html5Qrcode) { $('sErr').textContent = 'Skener se nije učitao. Osvježi stranicu.'; return; }
+  // ---------- Fotografija računa ----------
+  // Server s fotografije čita QR kod i OIB lokala, pa šaljemo cijelu sliku (smanjenu na najviše 2000 px).
+  function startScanner() { $('sErr').textContent = ''; }
+  function stopScanner() {}
+  async function photoToDataUrl(file) {
+    const url = URL.createObjectURL(file);
     try {
-      scanner = new Html5Qrcode('reader', { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], verbose: false, experimentalFeatures: { useBarCodeDetectorIfSupported: true } });
-      await scanner.start({ facingMode: 'environment' }, { fps: 15, qrbox: (w, h) => { const s = Math.floor(Math.min(w, h) * 0.8); return { width: s, height: s }; }, videoConstraints: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } }, onScan, () => {});
-    } catch (e) {
-      $('sErr').textContent = 'Kamera nije dostupna. Dopusti pristup kameri u postavkama preglednika.';
-      scanner = null;
-    }
+      const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+      const s = Math.min(1, 2000 / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      return c.toDataURL('image/jpeg', 0.88);
+    } finally { URL.revokeObjectURL(url); }
   }
-  function stopScanner() {
-    if (scanner) { const s = scanner; scanner = null; s.stop().then(() => s.clear()).catch(() => {}); }
-  }
-  async function onScan(text) {
+  $('sPhoto').addEventListener('change', async ev => {
+    const f = ev.target.files && ev.target.files[0]; ev.target.value = '';
+    if (!f || scanBusy) return;
+    $('sErr').textContent = ''; $('sBusy').classList.remove('hidden'); $('sPhotoBtn').classList.add('hidden');
+    try {
+      let image;
+      try { image = await photoToDataUrl(f); } catch { throw new Error('Fotografija se ne može otvoriti. Pokušaj ponovno.'); }
+      await onScan(image);
+    } catch (e) { $('sErr').textContent = e.message; }
+    finally { $('sBusy').classList.add('hidden'); $('sPhotoBtn').classList.remove('hidden'); }
+  });
+  async function onScan(image) {
     if (scanBusy) return; scanBusy = true;
     try {
-      const r = await api('/api/scan', { body: { code: text } });
+      const r = await api('/api/scan', { body: { image } });
       me = r.me; renderCard();
       $('dAdded').textContent = r.added;
       $('dInfo').textContent = r.amountCents != null ? 'Račun ' + euro(r.amountCents) + ' · ' + new Date().toLocaleDateString('hr-HR') : '';
@@ -165,15 +152,6 @@
     }
     scanBusy = false;
   }
-
-  if ($('photo')) $('photo').addEventListener('change', async e => {
-    const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
-    $('sErr').textContent = ''; if ($('sBusy')) $('sBusy').hidden = false;
-    stopScanner();
-    try { const text = await decodeImageFile(f, 'reader2'); scanBusy = false; await onScan(text); }
-    catch (err) { $('sErr').textContent = err.message; }
-    finally { if ($('sBusy')) $('sBusy').hidden = true; if (!$('vScan').classList.contains('hidden') && !scanner) startScanner(); }
-  });
 
   // ---------- Akcije ----------
   async function refresh() {

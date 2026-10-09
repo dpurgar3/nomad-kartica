@@ -10,7 +10,7 @@ Aplikacija radi u pregledniku mobitela, pa je ne treba skidati s App Storea ni G
 
 | Dio | Adresa | Čemu služi |
 |---|---|---|
-| Aplikacija za goste | `/` | Izrada kartice (ime, mobitel, PIN), skeniranje računa, bodovi, nagrade, Wi-Fi |
+| Aplikacija za goste | `/` | Izrada kartice (ime, mobitel, PIN), fotografiranje računa, bodovi, nagrade, Wi-Fi |
 | Ekran za osoblje | `/osoblje` | Potvrda nagrade (kamera ili upis koda), ručno dodavanje bodova, statistika |
 | Server | `server.js` | Node.js + Express, baza SQLite (`data/nomad.db`) |
 
@@ -61,23 +61,25 @@ Ostale mogućnosti:
 | `MAX_RECEIPTS_PER_DAY` | 1 | Najviše računa po gostu dnevno |
 | `RECEIPT_MAX_AGE_HOURS` | 48 | Do koliko sati nakon izdavanja se račun može skenirati |
 | `MIN_RECEIPT_CENTS` | 0 | Najmanji iznos računa za bodove (u centima) |
+| `NOMAD_OIB` | 53253782263 | OIB koji mora biti na računu da bi se dodali bodovi |
 
 ## Kako aplikacija provjerava račun
 
-Na hrvatskom fiskalnom računu je QR kod s poveznicom za provjeru računa u Poreznoj upravi, oblika
-`https://porezna.gov.hr/rn?jir=…&datv=GGGGMMDD_SSMM&izn=…`.
+Gost **fotografira cijeli račun** (od naziva lokala do QR koda). Server s iste fotografije čita:
 
-Server iz tog koda uzima **JIR (ili ZKI), vrijeme i iznos** računa. Bodove odbija ako:
+1. **QR kod** fiskalnog računa (`https://porezna.gov.hr/rn?jir=…&datv=…&izn=…`): JIR, vrijeme i iznos,
+2. **OIB izdavatelja** otisnut na vrhu računa (čitanje teksta, OCR).
 
+QR kod fiskalnog računa ne sadrži OIB, zato se OIB čita s fotografije. Bodovi se daju samo ako je na računu OIB obrta Artist (`NOMAD_OIB`, zadano 53253782263).
+
+Bodove odbija ako:
+
+- račun nije iz NOMAd-a (na računu je drugi OIB ili se OIB ne vidi),
 - je isti račun već iskorišten (svaki JIR vrijedi samo jednom),
 - je gost danas već skenirao račun (najviše 1 dnevno),
-- je račun stariji od 48 sati,
-- kod nije s fiskalnog računa.
+- je račun stariji od 48 sati.
 
-**Važno prije puštanja gostima:**
-
-- **Isprobajte na pravom računu iz Remarisa** da je QR kod tiskan i u gornjem obliku. Ako je oblik drukčiji, programer prilagodi funkciju `parseReceipt` u `server.js`.
-- QR kod ne sadrži OIB izdavatelja, pa aplikacija ne može sama znati je li račun iz NOMAd-a ili iz druge trgovine. Zloupotrebu ograničavaju pravilo 1 račun dnevno, rok od 48 sati i statistika na ekranu osoblja. Za strožu provjeru programer može dodati najmanji iznos računa (`MIN_RECEIPT_CENTS`) ili dodatnu provjeru.
+Ako se pravi NOMAd račun ne uspije pročitati (zgužvan, mutan), konobar može dodati bodove ručno na `/osoblje`.
 
 ## Nagrada
 
@@ -95,6 +97,7 @@ Server iz tog koda uzima **JIR (ili ZKI), vrijeme i iznos** računa. Bodove odbi
 
 ```
 server.js                 server i sva pravila
+receipt-check.js          čitanje QR koda i OIB-a s fotografije računa
 public/index.html         aplikacija za goste
 public/app.js, app.css    logika i izgled (crno-zlatno)
 public/osoblje.html, .js  ekran za osoblje

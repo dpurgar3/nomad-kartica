@@ -92,7 +92,7 @@
     <div class="section">Kako radi</div>
     <div class="steps">
       <div><b>1</b>Plati u NOMAd-u i uzmi račun</div>
-      <div><b>2</b><span>Skeniraj kod s računa: +<span class="ppr">10</span> bodova</span></div>
+      <div><b>2</b><span>Fotografiraj cijeli račun: +<span class="ppr">10</span> bodova</span></div>
       <div><b>3</b><span><span class="goal">50</span> bodova = kava + kroasan gratis</span></div>
     </div>
   </section>
@@ -101,13 +101,12 @@
   <section id="vScan" class="hidden" style="display:flex;flex-direction:column;gap:14px">
     <div class="top"><button class="icon-btn" id="scanBack" aria-label="Natrag"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-back"/></svg></button><b style="font-size:17px">Skeniraj račun</b><span style="width:44px"></span></div>
     <div class="notice"><svg width="26" height="26" fill="none" stroke="#D4AF5A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><use href="#i-receipt"/></svg><div><b>Uzmi račun!</b> Bez računa se ne računa.</div></div>
-    <p class="center" style="margin:0;color:var(--soft);line-height:1.45">Usmjeri kameru na <b style="color:var(--text)">QR kod na dnu računa</b>. Bodovi se dodaju odmah.</p>
-    <div class="scan-box"><div id="reader"></div></div>
-    <label class="btn ghost" for="photo" style="cursor:pointer">Ne čita? Fotografiraj QR kod</label>
-    <input id="photo" type="file" accept="image/*" capture="environment" hidden>
-    <div id="sBusy" class="small center" hidden>Čitam kod…</div>
-    <div id="reader2" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0"></div>
+    <p class="center" style="margin:0;color:var(--soft);line-height:1.45">Fotografiraj <b style="color:var(--text)">cijeli račun</b>, od naziva lokala na vrhu do QR koda na dnu. Neka bude ravno i oštro.</p>
+    <label class="btn" for="sPhoto" id="sPhotoBtn" style="cursor:pointer"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-scan"/></svg><span>Fotografiraj račun</span></label>
+    <input id="sPhoto" type="file" accept="image/*" capture="environment" class="hidden">
+    <p class="center small hidden" id="sBusy" role="status" style="margin:0">Provjeravam račun… (do 15 sekundi)</p>
     <div class="err center" id="sErr" role="alert"></div>
+    <p class="small center" style="margin:0">Bodove donose samo računi iz NOMAd Caffe Bara.</p>
     <p class="small center" style="margin:0">Svaki račun vrijedi jednom · najviše <span id="maxDay">1</span> račun dnevno</p>
   </section>
 
@@ -173,7 +172,6 @@
   </div>
 </div>
 
-<script src="/vendor/html5-qrcode.min.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>

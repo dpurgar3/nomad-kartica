@@ -1,5 +1,5 @@
 // Jednostavan service worker: sprema izgled aplikacije, a podatke (API) uvijek traži sa servera.
-const CACHE = 'nomad-v1';
+const CACHE = 'nomad-v2';
 const SHELL = ['/', '/app.css', '/app.js', '/vendor/html5-qrcode.min.js', '/logo-192.png', '/manifest.webmanifest'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
