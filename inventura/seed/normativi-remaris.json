@@ -1,0 +1,2040 @@
+{
+ "izvor": "Remaris normativi (izvoz u Excel), 9.10.2026.",
+ "vrijedi_od": "2026-01-01",
+ "normativi": [
+  {
+   "sifra": "1000",
+   "naziv": "ESPRESSO KAVA KRAĆA",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.008",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Vrećica šećera 4gr ZADUŽNI",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1001",
+   "naziv": "KAVA BEZ KOFEINA ESPRESSO",
+   "sastojci": [
+    {
+     "naziv": "Kava bezkofein. filter kom",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1002",
+   "naziv": "MALA KAVA S MLIJEKOM",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.008",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.05",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1003",
+   "naziv": "KAVA SA ŠLAGOM",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.0075",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Šlag ml.",
+     "kolicina": "0.005",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1004",
+   "naziv": "KAVA SA VRHNJEM",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.0075",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Vrhnje za kavu zadužno",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1005",
+   "naziv": "KAVA \"NOMAD\"",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.0075",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Šlag ml.",
+     "kolicina": "0.005",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1006",
+   "naziv": "IRSKA KAVA",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.0075",
+     "jedinica": "kg",
+     "napomena": "Jack Daniel's 0,003 L – vjerojatno 0,03"
+    },
+    {
+     "naziv": "Šlag ml.",
+     "kolicina": "0.005",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Jack Daniel's lit",
+     "kolicina": "0.003",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1007",
+   "naziv": "KAPUČINO IZ APARATA",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.0075",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1008",
+   "naziv": "KAKAO",
+   "sastojci": [
+    {
+     "naziv": "Kakao vrećica ZADUŽNA",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    },
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.15",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1009",
+   "naziv": "LEDENA KAVA",
+   "sastojci": [
+    {
+     "naziv": "Šlag ml.",
+     "kolicina": "0.005",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.0075",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Sladoled vanilija 2l",
+     "kolicina": "0.025",
+     "jedinica": "kg",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1010",
+   "naziv": "VRUĆA ČOKOLADA SA ŠLAGOM",
+   "sastojci": [
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.15",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Šlag ml.",
+     "kolicina": "0.005",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Vrećica vruća čokolada ZADUŽNA",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1011",
+   "naziv": "VRUĆA ČOKOLADA",
+   "sastojci": [
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Vrećica vruća čokolada ZADUŽNA",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1012",
+   "naziv": "CAPPUCCINO inst. SA VODOM",
+   "sastojci": [
+    {
+     "naziv": "Vrećica instant cappuccino ZADUŽNI",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1013",
+   "naziv": "CAPPUCCINO inst. SA MLIJEKOM",
+   "sastojci": [
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.05",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Vrećica instant cappuccino ZADUŽNI",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1014",
+   "naziv": "ČAJ S LIMUNOM",
+   "sastojci": [
+    {
+     "naziv": "Vrećica filter čaja ZADUŽNI",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    },
+    {
+     "naziv": "Limun kg zadužni",
+     "kolicina": "0.05",
+     "jedinica": "kg",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1015",
+   "naziv": "ČAJ S LIMUNOM I MEDOM",
+   "sastojci": [
+    {
+     "naziv": "Vrećica filter čaja ZADUŽNI",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    },
+    {
+     "naziv": "Limun kg zadužni",
+     "kolicina": "0.05",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Med za čaj kom",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2000",
+   "naziv": "KUHANO VINO 0,20l",
+   "sastojci": [
+    {
+     "naziv": "Vino bijelo Zadužno",
+     "kolicina": "0.2",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2002",
+   "naziv": "GEMIŠT 0,20l",
+   "sastojci": [
+    {
+     "naziv": "MINERALNA VODA JAMNICA 1l",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": "0,16+0,1 = 0,26 L za 0,20 l"
+    },
+    {
+     "naziv": "Vino bijelo Zadužno",
+     "kolicina": "0.16",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2003",
+   "naziv": "LIMUNADA 0,2 l.",
+   "sastojci": [
+    {
+     "naziv": "Limun kg zadužni",
+     "kolicina": "0.2",
+     "jedinica": "kg",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2100",
+   "naziv": "CAMPARI ORANGE 0,15 l.",
+   "sastojci": [
+    {
+     "naziv": "Campari lit",
+     "kolicina": "0.05",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2101",
+   "naziv": "APEROL SPRITZ 0,25 l",
+   "sastojci": [
+    {
+     "naziv": "Aperol liker lit",
+     "kolicina": "0.05",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Pjenušavo vino zadužno",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Mineralna voda",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2004",
+   "naziv": "CIJEĐENI SOK NARANČA 0,10l",
+   "sastojci": [
+    {
+     "naziv": "Naranča kg",
+     "kolicina": "0.1",
+     "jedinica": "kg",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2005",
+   "naziv": "ŠKROPEC 0,10l",
+   "sastojci": [
+    {
+     "naziv": "Vino bijelo Zadužno",
+     "kolicina": "0.09",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "MINERALNA VODA JAMNICA 1l",
+     "kolicina": "0.01",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2102",
+   "naziv": "MARTINI DRY 0,15l.",
+   "sastojci": [
+    {
+     "naziv": "Bulldog gin lit",
+     "kolicina": "0.05",
+     "jedinica": "l",
+     "napomena": "Martini Dry skida Bulldog gin"
+    },
+    {
+     "naziv": "Martini Bianco lit",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2021",
+   "naziv": "CEDEVITA 0,20l",
+   "sastojci": [
+    {
+     "naziv": "Vrećica cedevita ZADUŽNA",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2027",
+   "naziv": "MINERALNA VODA JAMNICA 1l",
+   "sastojci": [
+    {
+     "naziv": "Mineralna voda",
+     "kolicina": "1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2028",
+   "naziv": "MINERALNA VODA JAMNICA 0,20l",
+   "sastojci": [
+    {
+     "naziv": "Mineralna voda",
+     "kolicina": "0.2",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2029",
+   "naziv": "MINERALNA VODA JAMNICA 0,10l",
+   "sastojci": [
+    {
+     "naziv": "Mineralna voda",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1016",
+   "naziv": "VELIKA KAVA S MLIJEKOM",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.008",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.05",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Vrećica šećera 4gr ZADUŽNI",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1017",
+   "naziv": "KAVA BEZ KOFEINA S MLIJEKOM",
+   "sastojci": [
+    {
+     "naziv": "Kava bezkofein. filter kom",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    },
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1018",
+   "naziv": "LATTE MACHIATO MALI",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.0075",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.05",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1019",
+   "naziv": "CAPPUCCINO INSTANT 0,2 L.",
+   "sastojci": [
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.2",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Vrećica instant cappuccino ZADUŽNI",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1020",
+   "naziv": "MLIJEKO 0,1 l.",
+   "sastojci": [
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1021",
+   "naziv": "ŠLAG",
+   "sastojci": [
+    {
+     "naziv": "Šlag ml.",
+     "kolicina": "0.005",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1022",
+   "naziv": "VRHNJE KOM.",
+   "sastojci": [
+    {
+     "naziv": "Vrhnje za kavu zadužno",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1023",
+   "naziv": "ČAJ",
+   "sastojci": [
+    {
+     "naziv": "Vrećica filter čaja ZADUŽNI",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    },
+    {
+     "naziv": "Vrećica šećera 4gr ZADUŽNI",
+     "kolicina": "3",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1024",
+   "naziv": "LIMUN",
+   "sastojci": [
+    {
+     "naziv": "Limun kg zadužni",
+     "kolicina": "0.05",
+     "jedinica": "kg",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1025",
+   "naziv": "MED",
+   "sastojci": [
+    {
+     "naziv": "Med za čaj kom",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1026",
+   "naziv": "KAVA / COCTA 0,275l",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.0075",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "COCTA 0,275l.",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1027",
+   "naziv": "KAVA / ROMERQUELLE 0,25l",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.0075",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "ROMERQUELLE EMOTION 0,33l",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3100",
+   "naziv": "VERMUT 0,10l",
+   "sastojci": [
+    {
+     "naziv": "Vermouth lit",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": "0,1+0,1 = 0,2 L za 0,10 l"
+    },
+    {
+     "naziv": "Martini Bianco lit",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3101",
+   "naziv": "VINO BIJELO 1 litar",
+   "sastojci": [
+    {
+     "naziv": "Vino bijelo Zadužno",
+     "kolicina": "1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3102",
+   "naziv": "VINO CRVENO 1/1l.",
+   "sastojci": [
+    {
+     "naziv": "Vino crveno Zadužno",
+     "kolicina": "1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3103",
+   "naziv": "MUŠKATNO VINO 0,75l",
+   "sastojci": [
+    {
+     "naziv": "Muškatno vino zadužno litar",
+     "kolicina": "0.75",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3104",
+   "naziv": "RAJNSKI RIZLING 0,75l",
+   "sastojci": [
+    {
+     "naziv": "Rajnski rizling lit",
+     "kolicina": "0.75",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3105",
+   "naziv": "REFOŠK SIMČIĆ 0,75l",
+   "sastojci": [
+    {
+     "naziv": "Refošk Simčić lit",
+     "kolicina": "0.75",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2043",
+   "naziv": "KUHANO VINO CRNO 0,20l",
+   "sastojci": [
+    {
+     "naziv": "Vino crveno Zadužno",
+     "kolicina": "0.14",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3106",
+   "naziv": "MUŠKATNO VINO 0,10l",
+   "sastojci": [
+    {
+     "naziv": "Muškatno vino zadužno litar",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3107",
+   "naziv": "RAJNSKI RIZLING 0,10l",
+   "sastojci": [
+    {
+     "naziv": "Rajnski rizling lit",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3108",
+   "naziv": "REFOŠK SIMČIĆ 0,10l",
+   "sastojci": [
+    {
+     "naziv": "Refošk Simčić lit",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3109",
+   "naziv": "VINO BIJELO 0,10l",
+   "sastojci": [
+    {
+     "naziv": "Vino bijelo Zadužno",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3110",
+   "naziv": "VINO CRVENO 0,10l",
+   "sastojci": [
+    {
+     "naziv": "Vino crveno Zadužno",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3111",
+   "naziv": "PJENUŠAVO VINO 0,10l",
+   "sastojci": [
+    {
+     "naziv": "Pjenušavo vino zadužno",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3112",
+   "naziv": "PJENUŠAVO VINO 0,75l",
+   "sastojci": [
+    {
+     "naziv": "Pjenušac Kopjar zadužno",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": "Boca 0,75 l, a skida 0,1 L"
+    }
+   ]
+  },
+  {
+   "sifra": "3113",
+   "naziv": "PJENUŠAVO VINO 0,75l",
+   "sastojci": [
+    {
+     "naziv": "Pjenušavo vino zadužno",
+     "kolicina": "0.75",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4000",
+   "naziv": "JAGERMEISTER 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Jagermeister lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4001",
+   "naziv": "CAMPARI 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Campari lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4002",
+   "naziv": "AMARO 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Amaro 18 lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4003",
+   "naziv": "BACARDI RUM 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Bacardi rum lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4004",
+   "naziv": "PELINKOVAC 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Pelinkovac lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4005",
+   "naziv": "TREN LIKER OD ARONIJE 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Tren liker od aronije Zadužni",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4007",
+   "naziv": "GIN TANGERAY 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Gin Tangeray lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4008",
+   "naziv": "BULLDOG GIN 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Bulldog gin lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4009",
+   "naziv": "STOCK 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Stock lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4010",
+   "naziv": "VODKA 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Vodka lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4011",
+   "naziv": "RUM DOMAĆI 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Rum domaći lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4012",
+   "naziv": "JACK DANIEL'S 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Jack Daniel's lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4013",
+   "naziv": "GENTLEMAN JACK 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Gentleman jack lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4014",
+   "naziv": "FAMOUS GROUSE 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Famous Grouse lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4015",
+   "naziv": "HENNESSY 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Hennessy lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4016",
+   "naziv": "COURVOISIER 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Courvoisier lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4017",
+   "naziv": "MARTELL 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Martell lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4018",
+   "naziv": "VILJAMOVKA 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Viljamovka lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4019",
+   "naziv": "LOZOVAČA 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Lozovača lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4020",
+   "naziv": "TRAVARICA 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Travarica lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4021",
+   "naziv": "ŠLJIVOVICA 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Šljivovica lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4022",
+   "naziv": "MEDENA RAKIJA 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Medena rakija lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4023",
+   "naziv": "RAKIJA ZLATNA 0,04l",
+   "sastojci": [
+    {
+     "naziv": "Rakija zlatna lit",
+     "kolicina": "0.04",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3114",
+   "naziv": "VINO CRVENO 0,75l.",
+   "sastojci": [
+    {
+     "naziv": "Vino crveno 0,75l.",
+     "kolicina": "0.75",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3012",
+   "naziv": "Sladoled vanilija 2l",
+   "sastojci": [
+    {
+     "naziv": "SLADOLED KUGLICA",
+     "kolicina": "0.07",
+     "jedinica": "kg",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1029",
+   "naziv": "KAVA / CEDEVITA",
+   "sastojci": [
+    {
+     "naziv": "CEDEVITA 0,20l",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    },
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.0075",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1030",
+   "naziv": "LEDENI KAPUČINO",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.0075",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Šlag ml.",
+     "kolicina": "0.005",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Vrećica instant cappuccino ZADUŽNI",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1031",
+   "naziv": "BIJELA KAVA",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.0075",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.2",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4024",
+   "naziv": "VIŠNJEVAC, ORAHOVAC 0,03l",
+   "sastojci": [
+    {
+     "naziv": "Višnjevac, orahovac sa medom",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2045",
+   "naziv": "SOMERSBY-PUNČ 0,2 l",
+   "sastojci": [
+    {
+     "naziv": "ASPAL 0,33 l",
+     "kolicina": "0.11",
+     "jedinica": "kom",
+     "napomena": "Aspal 0,11 kom"
+    },
+    {
+     "naziv": "Sailors Queen litar zadužni",
+     "kolicina": "0.003",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3016",
+   "naziv": "PREMIUM KOLAČ I VINO 0,1 l",
+   "sastojci": [
+    {
+     "naziv": "PREMIUM KOLAČ",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    },
+    {
+     "naziv": "Crno vino lit.",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2052",
+   "naziv": "JANA PRIR. VODA 0,33, 0,5l",
+   "sastojci": [
+    {
+     "naziv": "Mineralna voda",
+     "kolicina": "0.01",
+     "jedinica": "l",
+     "napomena": "Voda 0,33/0,5 l skida samo 0,01 L"
+    }
+   ]
+  },
+  {
+   "sifra": "2055",
+   "naziv": "PAGO PRIRODNI SOK 0,2",
+   "sastojci": [
+    {
+     "naziv": "PAGO SOK 0,2",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4025",
+   "naziv": "GIN RAZNI 0,03 l.",
+   "sastojci": [
+    {
+     "naziv": "gin zadužni",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4026",
+   "naziv": "CHERRY BRANDY 0,03",
+   "sastojci": [
+    {
+     "naziv": "Cherry Brandy litar zadužni",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4028",
+   "naziv": "CYNAR BITER 0,03",
+   "sastojci": [
+    {
+     "naziv": "Cynar Bitter",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4029",
+   "naziv": "RAKIJA - LIKER 0,02",
+   "sastojci": [
+    {
+     "naziv": "Rakija-liker zadužni",
+     "kolicina": "0.02",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1032",
+   "naziv": "BANANA SPLIT SLADOLED",
+   "sastojci": [
+    {
+     "naziv": "SLADOLED KUGLICA",
+     "kolicina": "3",
+     "jedinica": "kg",
+     "napomena": "Sladoled kuglica 3 Kg – vjerojatno 3 kuglice"
+    },
+    {
+     "naziv": "Šlag ml.",
+     "kolicina": "0.005",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Banana",
+     "kolicina": "0.15",
+     "jedinica": "kg",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2064",
+   "naziv": "MIX SOK OD VOĆA 0,2L.",
+   "sastojci": [
+    {
+     "naziv": "Naranča kg",
+     "kolicina": "0.15",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Grejp kg. zadužni",
+     "kolicina": "0.1",
+     "jedinica": "kg",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2065",
+   "naziv": "CIJEĐENI SOK NARANČA 0,2L.",
+   "sastojci": [
+    {
+     "naziv": "Grejp kg. zadužni",
+     "kolicina": "0.15",
+     "jedinica": "kg",
+     "napomena": "Sok naranča sadrži i grejp"
+    },
+    {
+     "naziv": "Naranča kg",
+     "kolicina": "0.15",
+     "jedinica": "kg",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1033",
+   "naziv": "SLADOLEDNI KUP-PRELIV",
+   "sastojci": [
+    {
+     "naziv": "SLADOLED KUGLICA",
+     "kolicina": "3",
+     "jedinica": "kg",
+     "napomena": "Sladoled kuglica 3 Kg – vjerojatno 3 kuglice"
+    },
+    {
+     "naziv": "Šlag ml.",
+     "kolicina": "0.005",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2066",
+   "naziv": "BAMBUS 0,2 l.",
+   "sastojci": [
+    {
+     "naziv": "Vino crveno Zadužno",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Coca- Cola 1L",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2103",
+   "naziv": "GIN-TONIC 0,2 l.",
+   "sastojci": [
+    {
+     "naziv": "TONIK 1/1l.",
+     "kolicina": "0.15",
+     "jedinica": "l",
+     "napomena": "Nema gina u normativu"
+    },
+    {
+     "naziv": "Limun kg zadužni",
+     "kolicina": "0.05",
+     "jedinica": "kg",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1034",
+   "naziv": "PRIRODNI SOK / KAVA",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.007",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Naranča kg",
+     "kolicina": "0.1",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Grejp kg. zadužni",
+     "kolicina": "0.1",
+     "jedinica": "kg",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4030",
+   "naziv": "TERANINO 0,03l.",
+   "sastojci": [
+    {
+     "naziv": "Teranino zadužni",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1035",
+   "naziv": "JAGER-COLA BOAT 2L.",
+   "sastojci": [
+    {
+     "naziv": "Jagermeister lit",
+     "kolicina": "1",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Coca- Cola 1L",
+     "kolicina": "2",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1036",
+   "naziv": "VINO+VODA 1/1",
+   "sastojci": [
+    {
+     "naziv": "VINO BIJELO 1 litar",
+     "kolicina": "1",
+     "jedinica": "porcija",
+     "napomena": null
+    },
+    {
+     "naziv": "MINERALNA VODA JAMNICA 1l",
+     "kolicina": "1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1037",
+   "naziv": "KAVA BEZKOFEINSKA VRHNJE",
+   "sastojci": [
+    {
+     "naziv": "Vrhnje za kavu zadužno",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    },
+    {
+     "naziv": "Kava bezkofein. filter kom",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1038",
+   "naziv": "KAVA-KROASAN",
+   "sastojci": [
+    {
+     "naziv": "ESPRESSO KAVA KRAĆA",
+     "kolicina": "0.006",
+     "jedinica": "porcija",
+     "napomena": "Espresso 0,006 kom / sok 0,2 kom – vjerojatno 1 i 1"
+    },
+    {
+     "naziv": "CIJEĐENI SOK NARANČA 0,2L.",
+     "kolicina": "0.2",
+     "jedinica": "porcija",
+     "napomena": null
+    },
+    {
+     "naziv": "ŠTRUDLA punjena",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "20522",
+   "naziv": "GAZIRANA VODA JAMNICA 0,5",
+   "sastojci": [
+    {
+     "naziv": "JANA PRIR. VODA 0,33, 0,5l",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "3115",
+   "naziv": "VINO CHARDONNAY 0,75",
+   "sastojci": [
+    {
+     "naziv": "Vino chardonnay zadužno",
+     "kolicina": "0.75",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4031",
+   "naziv": "MENTOL LIKER 0,03L.",
+   "sastojci": [
+    {
+     "naziv": "Liker Mentol zadužni",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "10398",
+   "naziv": "KRALJEVSKA VRUĆA ČOKOLADA",
+   "sastojci": [
+    {
+     "naziv": "Vrećica vruća čokolada ZADUŽNA",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": "Šlag 0,1 L (inače 0,005)"
+    },
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.15",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Šlag ml.",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "10390",
+   "naziv": "PRINCEZA VRUĆA ČOKOLADA",
+   "sastojci": [
+    {
+     "naziv": "Vrećica vruća čokolada ZADUŽNA",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": "Šlag 0,1 L (inače 0,005)"
+    },
+    {
+     "naziv": "Šlag ml.",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.15",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4032",
+   "naziv": "BAJADERA LIKER 0,03",
+   "sastojci": [
+    {
+     "naziv": "Bajadera krem liker 0,7 l.",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1040",
+   "naziv": "ĆOKOLADA VRUĆA 0,2l.",
+   "sastojci": [
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.15",
+     "jedinica": "l",
+     "napomena": "Pripravak 0 Kg"
+    },
+    {
+     "naziv": "Pripravak za vruću čokoladu",
+     "kolicina": "0",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Vrećica vruća čokolada ZADUŽNA",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1041",
+   "naziv": "ČOKOLADA VRUĆA SA ŠLAGOM",
+   "sastojci": [
+    {
+     "naziv": "Šlag ml.",
+     "kolicina": "0.005",
+     "jedinica": "l",
+     "napomena": "Pripravak 0 Kg, nema vrećice čokolade"
+    },
+    {
+     "naziv": "Mlijeko lit",
+     "kolicina": "0.15",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Pripravak za vruću čokoladu",
+     "kolicina": "0",
+     "jedinica": "kg",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1042",
+   "naziv": "ČAJ PIRAMIDA EKSKLUZIV",
+   "sastojci": [
+    {
+     "naziv": "Čaj Piramida zadužni",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    },
+    {
+     "naziv": "Vrećica šećera 4gr ZADUŽNI",
+     "kolicina": "3",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2104",
+   "naziv": "MOJITO 0,15l.",
+   "sastojci": [
+    {
+     "naziv": "BACARDI RUM 0,03l",
+     "kolicina": "0.06",
+     "jedinica": "porcija",
+     "napomena": "Bacardi 0,03l × 0,06 – vjerojatno 1–2 porcije"
+    },
+    {
+     "naziv": "Limun kg zadužni",
+     "kolicina": "0.05",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "TONIK 1/1l.",
+     "kolicina": "0.15",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Limeta kg.",
+     "kolicina": "0.05",
+     "jedinica": "kg",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1043",
+   "naziv": "KAVA - JUICE 0,2 l.",
+   "sastojci": [
+    {
+     "naziv": "VELIKA KAVA S MLIJEKOM",
+     "kolicina": "1",
+     "jedinica": "porcija",
+     "napomena": null
+    },
+    {
+     "naziv": "ŠTRUDLA punjena",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2105",
+   "naziv": "CUBA LIBRE 0,2l.",
+   "sastojci": [
+    {
+     "naziv": "Bacardi rum lit",
+     "kolicina": "0.05",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Coca- Cola 1L",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Limun kg zadužni",
+     "kolicina": "0.05",
+     "jedinica": "kg",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1044",
+   "naziv": "ESPRESSO KAVA DUGA",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.0008",
+     "jedinica": "kg",
+     "napomena": "Kava 0,0008 kg – vjerojatno treba 0,008"
+    },
+    {
+     "naziv": "Vrećica šećera 4gr ZADUŽNI",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2106",
+   "naziv": "HUGO COCTAIL",
+   "sastojci": [
+    {
+     "naziv": "Sirup l.",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Pjenušavo vino zadužno",
+     "kolicina": "0.15",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Mineralna voda",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2107",
+   "naziv": "BLUE LAGOON COCTAIL",
+   "sastojci": [
+    {
+     "naziv": "Vodka lit",
+     "kolicina": "0.05",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Sirup l.",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "TONIK 1/1l.",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "10101",
+   "naziv": "KAVA AFFOGATO (STARI)",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.0075",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Sladoled vanilija 2l",
+     "kolicina": "0.04",
+     "jedinica": "kg",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4033",
+   "naziv": "APEROL LIKER 0,03L.",
+   "sastojci": [
+    {
+     "naziv": "Aperol liker lit",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2079",
+   "naziv": "GEMIŠT 0,3 l.",
+   "sastojci": [
+    {
+     "naziv": "Vino bijelo Zadužno",
+     "kolicina": "0.2",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Mineralna voda",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "1045",
+   "naziv": "UČENIČKI PAKET",
+   "sastojci": [
+    {
+     "naziv": "ESPRESSO KAVA KRAĆA",
+     "kolicina": "1",
+     "jedinica": "porcija",
+     "napomena": null
+    },
+    {
+     "naziv": "Vrećica cedevita ZADUŽNA",
+     "kolicina": "1",
+     "jedinica": "kom",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2108",
+   "naziv": "CAMPARI SPRITZ 0,25 L.",
+   "sastojci": [
+    {
+     "naziv": "Campari lit",
+     "kolicina": "0.05",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Pjenušavo vino zadužno",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Mineralna voda",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "2109",
+   "naziv": "LIMONCELLO SPRITZ 0,25 L.",
+   "sastojci": [
+    {
+     "naziv": "Mineralna voda",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": "Limoncello 1 L – vjerojatno 0,05 L"
+    },
+    {
+     "naziv": "Pjenušavo vino zadužno",
+     "kolicina": "0.1",
+     "jedinica": "l",
+     "napomena": null
+    },
+    {
+     "naziv": "Limoncello liker",
+     "kolicina": "1",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "4034",
+   "naziv": "LIMONCELLO LIKER 0,003",
+   "sastojci": [
+    {
+     "naziv": "Limoncello liker",
+     "kolicina": "0.03",
+     "jedinica": "l",
+     "napomena": null
+    }
+   ]
+  },
+  {
+   "sifra": "10102",
+   "naziv": "KAVA AFFOGATO",
+   "sastojci": [
+    {
+     "naziv": "Kava Zadužna kg",
+     "kolicina": "0.0075",
+     "jedinica": "kg",
+     "napomena": null
+    },
+    {
+     "naziv": "Sladoled vanilija 2l",
+     "kolicina": "0.04",
+     "jedinica": "kg",
+     "napomena": null
+    }
+   ]
+  }
+ ]
+}
