@@ -121,15 +121,17 @@ async function readOib(base, own) {
   const W = base.bitmap.width, H = base.bitmap.height;
   const prep = (x, y, w, h, target) => {
     const img = base.clone().crop(x, y, w, h).greyscale().normalize();
-    const s = target / w; if (Math.abs(s - 1) > 0.05) img.scale(Math.min(s, 3));
+    // ograniči veličinu slike za OCR (najviše ~3 MP) zbog memorije servera
+    const s = Math.min(target / w, 3, Math.sqrt(3e6 / (w * h)));
+    if (Math.abs(s - 1) > 0.05) img.scale(s);
     return img;
   };
   // OIB je u zaglavlju računa: 1) gornja trećina, 2) gornjih 60 % (dugi računi i nakošene fotografije)
   const top = (f) => Math.min(H, Math.max(Math.round(H * f), Math.round(W * 0.9)));
-  const passes = [prep(0, 0, W, top(0.33), 1600), prep(0, 0, W, top(0.6), 1600)];
+  const passes = [() => prep(0, 0, W, top(0.33), 1400), () => prep(0, 0, W, top(0.6), 1400)];
   let last = { ours: false, other: null, anyDigits: false };
-  for (const img of passes) {
-    const r = findOib(await ocr(img), own);
+  for (const make of passes) {
+    const r = findOib(await ocr(make()), own);
     if (r.ours) return r;
     if (r.other) return r; // jasno tuđi OIB: nema potrebe čitati dalje
     if (r.anyDigits) last = r;
@@ -155,4 +157,27 @@ async function checkReceiptPhoto(buffer, ownOib) {
   return { error: 'Ne vidim OIB na vrhu računa. Slikaj cijeli račun, od naziva lokala do QR koda, da sve bude oštro.', code: 'nooib' };
 }
 
-module.exports = { checkReceiptPhoto, findOib, validOib, getWorker, decodeQr };
+/**
+ * Lagana provjera (QR kod pročita mobitel): samo OIB s fotografije. Malo memorije i procesora.
+ * @returns {Promise<{ok:true}|{error:string,code:string}>}
+ */
+let busy = Promise.resolve();
+function checkOibPhoto(buffer, ownOib) {
+  // jedna provjera u isto vrijeme (server ima malo memorije)
+  const run = busy.then(async () => {
+    let base;
+    try { base = await Jimp.read(buffer); } catch { return { error: 'Fotografija se ne može otvoriti. Pokušaj ponovno.', code: 'image' }; }
+    const max = 2000, big = Math.max(base.bitmap.width, base.bitmap.height);
+    if (big > max) base.scale(max / big);
+    const oib = await readOib(base, ownOib);
+    base = null;
+    if (oib.ours) return { ok: true };
+    if (oib.other) return { error: 'Ovaj račun nije iz NOMAd-a. Bodove donose samo računi iz NOMAd Caffe Bara.', code: 'foreign' };
+    return { error: 'Ne vidim OIB na vrhu računa. Slikaj cijeli račun, od naziva lokala do QR koda, da sve bude oštro.', code: 'nooib' };
+  });
+  busy = run.catch(() => {});
+  const timeout = new Promise(res => setTimeout(() => res({ error: 'Provjera traje predugo. Pokušaj ponovno.', code: 'timeout' }), 40000));
+  return Promise.race([run, timeout]);
+}
+
+module.exports = { checkReceiptPhoto, checkOibPhoto, findOib, validOib, getWorker, decodeQr };
