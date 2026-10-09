@@ -164,6 +164,7 @@ const inventura = require('./inventura/routes').createInventura({
   adminPin: CFG.adminPin,
 });
 app.use('/inventura', inventura.router);
+app.get(['/i', '/I'], (req, res) => res.redirect(302, '/inventura/')); // kratki link za mobitel
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 app.use('/vendor/html5-qrcode.min.js', (req, res) =>
   res.sendFile(path.join(__dirname, 'node_modules', 'html5-qrcode', 'html5-qrcode.min.js')));
