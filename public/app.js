@@ -15,7 +15,11 @@
   async function api(path, opts = {}) {
     const headers = { 'Content-Type': 'application/json' };
     const t = store.get(); if (t) headers['X-Token'] = t;
-    const res = await fetch(path, { method: opts.body ? 'POST' : 'GET', headers, body: opts.body ? JSON.stringify(opts.body) : undefined });
+    const ctrl = new AbortController(); const tm = setTimeout(() => ctrl.abort(), opts.timeout || 30000);
+    let res;
+    try { res = await fetch(path, { method: opts.body ? 'POST' : 'GET', headers, body: opts.body ? JSON.stringify(opts.body) : undefined, signal: ctrl.signal }); }
+    catch (e) { throw new Error(e.name === 'AbortError' ? 'Provjera traje predugo. Pokušaj ponovno za minutu.' : 'Nema veze sa serverom. Provjeri internet i pokušaj ponovno.'); }
+    finally { clearTimeout(tm); }
     let data = {}; try { data = await res.json(); } catch {}
     if (!res.ok) { const e = new Error(data.error || 'Nešto nije u redu. Pokušaj ponovno.'); e.status = res.status; throw e; }
     return data;
@@ -110,35 +114,72 @@
   }
 
   // ---------- Fotografija računa ----------
-  // Server s fotografije čita QR kod i OIB lokala, pa šaljemo cijelu sliku (smanjenu na najviše 2000 px).
+  // Mobitel sam pročita QR kod s fotografije (brzo), a serveru šalje kod + smanjenu fotografiju,
+  // na kojoj server provjeri OIB lokala otisnut na vrhu računa.
   function startScanner() { $('sErr').textContent = ''; }
   function stopScanner() {}
-  async function photoToDataUrl(file) {
+  const pause = () => new Promise(r => setTimeout(r, 0));
+  function loadImage(file) {
     const url = URL.createObjectURL(file);
-    try {
-      const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
-      const s = Math.min(1, 2800 / Math.max(img.naturalWidth, img.naturalHeight));
-      const c = document.createElement('canvas');
-      c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-      return c.toDataURL('image/jpeg', 0.88);
-    } finally { URL.revokeObjectURL(url); }
+    return new Promise((res, rej) => { const i = new Image(); i.onload = () => res({ img: i, url }); i.onerror = () => { URL.revokeObjectURL(url); rej(new Error('img')); }; i.src = url; });
+  }
+  function drawCrop(img, x, y, w, h, scale, contrast) {
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w * scale)); c.height = Math.max(1, Math.round(h * scale));
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    if (contrast) ctx.filter = 'grayscale(1) contrast(1.6)';
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, x, y, w, h, 0, 0, c.width, c.height);
+    return c;
+  }
+  async function findQr(img) {
+    const W = img.naturalWidth, H = img.naturalHeight;
+    let det = null;
+    if ('BarcodeDetector' in window) { try { const f = await BarcodeDetector.getSupportedFormats(); if (f.includes('qr_code')) det = new BarcodeDetector({ formats: ['qr_code'] }); } catch {} }
+    const read = async c => {
+      if (det) { try { const r = await det.detect(c); if (r.length) return r[0].rawValue; } catch {} }
+      if (window.jsQR) { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height); const r = jsQR(d.data, c.width, c.height, { inversionAttempts: 'attemptBoth' }); if (r) return r.data; }
+      return null;
+    };
+    const tries = [];
+    for (const max of [1600, 1000]) tries.push([0, 0, W, H, max, false]);
+    tries.push([0, H * 0.45, W, H * 0.55, 1400, false], [0, H * 0.6, W, H * 0.4, 1200, false]);
+    // dugi računi: QR je malen – uvećaj preklapajuće pločice donjeg dijela računa
+    const tile = Math.max(150, Math.min(W, H * 0.35)), step = tile / 2;
+    for (let y = H - tile; y >= H * 0.3; y -= step) for (let x = 0; x <= Math.max(0, W - tile); x += step) {
+      for (const ct of [false, true]) tries.push([x, y, Math.min(tile, W - x), Math.min(tile, H - y), 1300, ct, true]);
+      if (x + tile >= W) break;
+    }
+    for (const [x, y, w, h, max, ct, up] of tries) {
+      const s = up ? Math.min(3, max / Math.max(w, h)) : Math.min(1, max / Math.max(w, h));
+      const t = await read(drawCrop(img, x, y, w, h, s, ct));
+      if (t) return t;
+      await pause();
+    }
+    return null;
   }
   $('sPhoto').addEventListener('change', async ev => {
     const f = ev.target.files && ev.target.files[0]; ev.target.value = '';
     if (!f || scanBusy) return;
     $('sErr').textContent = ''; $('sBusy').classList.remove('hidden'); $('sPhotoBtn').classList.add('hidden');
+    let url;
     try {
-      let image;
-      try { image = await photoToDataUrl(f); } catch { throw new Error('Fotografija se ne može otvoriti. Pokušaj ponovno.'); }
-      await onScan(image);
+      let img;
+      try { ({ img, url } = await loadImage(f)); } catch { throw new Error('Fotografija se ne može otvoriti. Pokušaj ponovno.'); }
+      $('sBusy').textContent = 'Čitam QR kod…';
+      const qr = await findQr(img);
+      if (!qr) throw new Error('Na fotografiji nisam pronašao QR kod. Slikaj račun izbliza, da QR kod bude oštar. Ako je račun dugačak, presavij srednji dio tako da se vide vrh i QR kod.');
+      $('sBusy').textContent = 'Provjeravam račun… (do 15 sekundi)';
+      const s = Math.min(1, 2000 / Math.max(img.naturalWidth, img.naturalHeight));
+      const image = drawCrop(img, 0, 0, img.naturalWidth, img.naturalHeight, s, false).toDataURL('image/jpeg', 0.85);
+      await onScan(qr, image);
     } catch (e) { $('sErr').textContent = e.message; }
-    finally { $('sBusy').classList.add('hidden'); $('sPhotoBtn').classList.remove('hidden'); }
+    finally { if (url) URL.revokeObjectURL(url); $('sBusy').classList.add('hidden'); $('sPhotoBtn').classList.remove('hidden'); }
   });
-  async function onScan(image) {
+  async function onScan(qr, image) {
     if (scanBusy) return; scanBusy = true;
     try {
-      const r = await api('/api/scan', { body: { image } });
+      const r = await api('/api/scan', { body: { qr, image }, timeout: 45000 });
       me = r.me; renderCard();
       $('dAdded').textContent = r.added;
       $('dInfo').textContent = r.amountCents != null ? 'Račun ' + euro(r.amountCents) + ' · ' + new Date().toLocaleDateString('hr-HR') : '';
