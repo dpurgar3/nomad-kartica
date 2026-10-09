@@ -189,7 +189,7 @@
     } catch (e) {
       if (e.status === 401) return logout();
       $('sErr').textContent = e.message;
-      setTimeout(() => { scanBusy = false; }, 2500); return;
+      scanBusy = false; return;
     }
     scanBusy = false;
   }
