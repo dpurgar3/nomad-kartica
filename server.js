@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const express = require('express');
 const Database = require('better-sqlite3');
 const QRCode = require('qrcode');
-const { checkReceiptPhoto, getWorker } = require('./receipt-check');
+const { checkOibPhoto, getWorker } = require('./receipt-check');
 
 // ---------- Postavke (.env) ----------
 loadEnv(path.join(__dirname, '.env'));
@@ -160,6 +160,8 @@ app.use((req, res, next) => (req.path === '/api/scan' ? next() : smallJson(req, 
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 app.use('/vendor/html5-qrcode.min.js', (req, res) =>
   res.sendFile(path.join(__dirname, 'node_modules', 'html5-qrcode', 'html5-qrcode.min.js')));
+app.use('/vendor/jsQR.js', (req, res) =>
+  res.sendFile(path.join(__dirname, 'node_modules', 'jsqr', 'dist', 'jsQR.js')));
 
 function auth(req, res, next) {
   const t = req.get('X-Token');
@@ -204,16 +206,23 @@ app.post('/api/login', limit('login', 8, 900e3), (req, res) => {
 
 app.get('/api/me', auth, (req, res) => res.json(meView(req.user)));
 
-// Gost šalje FOTOGRAFIJU cijelog računa. Server s iste fotografije čita QR kod i OIB izdavatelja,
-// pa se računi iz drugih trgovina odbijaju.
-app.post('/api/scan', express.json({ limit: '8mb' }), auth, limit('scan', 20, 3600e3), async (req, res) => {
+// Gost fotografira cijeli račun. Mobitel pročita QR kod i šalje ga sa smanjenom fotografijom;
+// server provjeri pravila računa, a zatim na fotografiji pročita OIB izdavatelja (računi iz drugih trgovina se odbijaju).
+app.post('/api/scan', express.json({ limit: '6mb' }), auth, limit('scan', 20, 3600e3), async (req, res) => {
   const m = String(req.body.image || '').match(/^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/=]+)$/);
-  if (!m) return res.status(400).json({ error: 'Fotografiraj račun i pokušaj ponovno.' });
-  const photo = await checkReceiptPhoto(Buffer.from(m[2], 'base64'), CFG.oib);
-  if (photo.error) return res.status(400).json({ error: photo.error, code: photo.code });
-  const r = parseReceipt(photo.qr);
+  if (!m || !req.body.qr) return res.status(400).json({ error: 'Fotografiraj račun i pokušaj ponovno.' });
+  const r = parseReceipt(req.body.qr);
   if (r.error) return res.status(400).json({ error: r.error });
   const now = Date.now();
+  // brze provjere prije čitanja OIB-a (štedi server)
+  if (now - r.when.getTime() <= CFG.receiptMaxAgeHours * 3600e3 && r.when.getTime() <= now + 3600e3) {
+    if (db.prepare('SELECT 1 FROM receipts WHERE receipt_key=?').get(r.key))
+      return res.status(409).json({ error: 'Ovaj račun je već iskorišten.' });
+    if (db.prepare('SELECT COUNT(*) AS n FROM receipts WHERE user_id=? AND zg_day=?').get(req.user.id, zgDay()).n >= CFG.maxReceiptsPerDay)
+      return res.status(429).json({ error: CFG.maxReceiptsPerDay === 1 ? 'Danas si već skenirao račun. Vidimo se sutra!' : 'Dosegnut je dnevni broj računa.' });
+    const oib = await checkOibPhoto(Buffer.from(m[2], 'base64'), CFG.oib);
+    if (oib.error) return res.status(400).json({ error: oib.error, code: oib.code });
+  }
   if (r.when.getTime() > now + 3600e3) return res.status(400).json({ error: 'Datum na računu nije ispravan.' });
   if (now - r.when.getTime() > CFG.receiptMaxAgeHours * 3600e3)
     return res.status(400).json({ error: `Račun je stariji od ${CFG.receiptMaxAgeHours} sati. Skeniraj račun odmah nakon plaćanja.` });
