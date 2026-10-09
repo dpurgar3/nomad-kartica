@@ -43,12 +43,41 @@ function decodeQr(base) {
     const t = qrFrom(img);
     if (t) return t;
   }
+  // Dugi računi: QR je malen na fotografiji. Uvećaj donji dio računa u preklapajućim pločicama
+  // (s pojačanim kontrastom) da moduli QR koda budu dovoljno veliki za čitanje.
+  const tile = Math.max(120, Math.round(Math.min(W, H * 0.35)));
+  const step = Math.round(tile / 2);
+  for (let y = H - tile; y >= Math.round(H * 0.3); y -= step) {
+    for (let x = 0; x <= Math.max(0, W - tile); x += step) {
+      const w = Math.min(tile, W - x), h = Math.min(tile, H - y);
+      for (const contrast of [false, true]) {
+        const img = base.clone().crop(x, y, w, h);
+        if (contrast) img.greyscale().normalize().contrast(0.4);
+        const up = Math.min(3, 900 / Math.max(w, h));
+        if (up > 1.05) img.scale(up, Jimp.RESIZE_BICUBIC);
+        const t = qrFrom(img);
+        if (t) return t;
+      }
+      if (x + tile >= W) break;
+    }
+  }
   return null;
 }
 
 // ---------- OIB ----------
 const CONFUSE = { O: '0', o: '0', D: '0', Q: '0', I: '1', l: '1', i: '1', '|': '1', '!': '1', Z: '2', z: '2', S: '5', s: '5', B: '8', G: '6', b: '6', g: '9', q: '9', T: '7' };
 // Iz OCR teksta izvuci nizove od 11 znamenki (redak po redak, s ispravkom tipičnih zamjena slova i brojki).
+// "Sigurni" kandidati: 11 znamenki u retku koji sadrži riječ OIB (za poruku "račun nije iz NOMAd-a").
+function labelledOibs(text) {
+  const out = [];
+  for (const line of String(text).split(/\r?\n/)) {
+    if (!/[O0][I1l|]B/i.test(line)) continue;
+    const after = line.split(/[O0][I1l|]B/i).slice(1).join(' ')
+      .replace(/[A-Za-z|!]/g, c => CONFUSE[c] || c).replace(/[^0-9]/g, '');
+    if (after.length >= 11) out.push(after.slice(0, 11));
+  }
+  return out;
+}
 function oibCandidates(text) {
   const out = new Set();
   for (const line of String(text).split(/\r?\n/)) {
@@ -77,7 +106,8 @@ function diff(a, b) { let n = 0; for (let i = 0; i < 11; i++) if (a[i] !== b[i])
 function findOib(text, own) {
   const cands = oibCandidates(text);
   if (cands.some(c => diff(c, own) <= 1)) return { ours: true };
-  const other = cands.find(validOib);
+  // drugi OIB: ispravan kontrolni broj I otisnut uz oznaku "OIB" (ne bilo koji niz znamenki s računa)
+  const other = labelledOibs(text).find(o => validOib(o) && diff(o, own) > 1);
   return { ours: false, other: other || null, anyDigits: cands.length > 0 };
 }
 
@@ -94,13 +124,15 @@ async function readOib(base, own) {
     const s = target / w; if (Math.abs(s - 1) > 0.05) img.scale(Math.min(s, 3));
     return img;
   };
-  // 1) gornja polovica (OIB je na vrhu), 2) cijeli račun
-  const passes = [prep(0, 0, W, Math.round(H * 0.55), 1600), prep(0, 0, W, H, 1600)];
+  // OIB je u zaglavlju računa: 1) gornja trećina, 2) gornjih 60 % (dugi računi i nakošene fotografije)
+  const top = (f) => Math.min(H, Math.max(Math.round(H * f), Math.round(W * 0.9)));
+  const passes = [prep(0, 0, W, top(0.33), 1600), prep(0, 0, W, top(0.6), 1600)];
   let last = { ours: false, other: null, anyDigits: false };
   for (const img of passes) {
     const r = findOib(await ocr(img), own);
     if (r.ours) return r;
-    if (r.other) last = r; else if (r.anyDigits && !last.other) last = r;
+    if (r.other) return r; // jasno tuđi OIB: nema potrebe čitati dalje
+    if (r.anyDigits) last = r;
   }
   return last;
 }
@@ -112,14 +144,15 @@ async function readOib(base, own) {
 async function checkReceiptPhoto(buffer, ownOib) {
   let base;
   try { base = await Jimp.read(buffer); } catch { return { error: 'Fotografija se ne može otvoriti. Pokušaj ponovno.', code: 'image' }; }
-  const max = 2200, big = Math.max(base.bitmap.width, base.bitmap.height);
+  const max = 3000, big = Math.max(base.bitmap.width, base.bitmap.height);
   if (big > max) base.scale(max / big);
   const qr = decodeQr(base);
-  if (!qr) return { error: 'Na fotografiji nisam pronašao QR kod. Slikaj cijeli račun izbliza, da bude oštar.', code: 'noqr' };
   const oib = await readOib(base, ownOib);
+  if (oib.other && !oib.ours) return { error: 'Ovaj račun nije iz NOMAd-a. Bodove donose samo računi iz NOMAd Caffe Bara.', code: 'foreign' };
+  if (!qr) return { error: 'Na fotografiji nisam pronašao QR kod. Slikaj račun izbliza, da QR kod bude oštar. Ako je račun dugačak, presavij srednji dio tako da se vide vrh i QR kod.', code: 'noqr' };
   if (oib.ours) return { qr };
   if (oib.other) return { error: 'Ovaj račun nije iz NOMAd-a. Bodove donose samo računi iz NOMAd Caffe Bara.', code: 'foreign' };
   return { error: 'Ne vidim OIB na vrhu računa. Slikaj cijeli račun, od naziva lokala do QR koda, da sve bude oštro.', code: 'nooib' };
 }
 
-module.exports = { checkReceiptPhoto, findOib, validOib, getWorker };
+module.exports = { checkReceiptPhoto, findOib, validOib, getWorker, decodeQr };
