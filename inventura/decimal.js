@@ -15,8 +15,9 @@ function parseE4(input) {
   }
   let s = String(input).trim().replace(/\s/g, '').replace(/ /g, '');
   if (s === '') return null;
-  // hrvatski format s točkom tisućica: 1.234,56
-  if (/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(s)) s = s.replace(/\./g, '');
+  // hrvatski format s točkom tisućica: 1.234,56 (točka je separator tisućica samo ako postoji i decimalni zarez;
+  // "0.008" i "1.5" su decimalni brojevi)
+  if (/^-?\d{1,3}(\.\d{3})+,\d+$/.test(s)) s = s.replace(/\./g, '');
   s = s.replace(',', '.');
   const m = /^([+-])?(\d+)(?:\.(\d+))?$/.exec(s);
   if (!m) return NaN;

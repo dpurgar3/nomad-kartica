@@ -449,7 +449,7 @@ function createService(db) {
     bookStock, articles, article, createArticle, updateArticle, addPackaging, deletePackaging,
     addMovement, movements, seedIfEmpty, importRemaris,
     inventory, createInventory, inventoryItems, inventorySummary, addCount, setCount, deleteCount, clearCount, setItemNote, refreshExpected,
-    closeInventory, correctItem, inventories, deleteOpenInventory, stockReport, auditLog, setting, audit,
+    closeInventory, correctItem, inventories, deleteOpenInventory, stockReport, auditLog, setting, audit, nextCodeForSeed: nextCode,
   };
 }
 

@@ -126,6 +126,72 @@ const MIGRATIONS = [
       value TEXT
     );
   ` },
+  {
+    id: 2, name: 'normativi_i_prodaja', sql: `
+    -- Normativ (receptura) prodajnog artikla; izmjena = nova verzija, stare verzije se nikad ne mijenjaju
+    CREATE TABLE recipes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      sale_code TEXT UNIQUE,
+      name TEXT NOT NULL,
+      active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE TABLE recipe_versions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      recipe_id INTEGER NOT NULL REFERENCES recipes(id),
+      version INTEGER NOT NULL,
+      valid_from TEXT NOT NULL,
+      yield_loss_pct_e4 INTEGER NOT NULL DEFAULT 0 CHECK (yield_loss_pct_e4 >= 0 AND yield_loss_pct_e4 < 1000000),
+      note TEXT,
+      source TEXT,
+      created_by INTEGER REFERENCES users(id),
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(recipe_id, version)
+    );
+    -- sastojak je ILI artikl sa zalihe (qty u osnovnoj jedinici artikla) ILI drugi normativ (qty = broj porcija)
+    CREATE TABLE recipe_lines (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      version_id INTEGER NOT NULL REFERENCES recipe_versions(id),
+      article_id INTEGER REFERENCES articles(id),
+      sub_recipe_id INTEGER REFERENCES recipes(id),
+      qty_e4 INTEGER NOT NULL CHECK (qty_e4 > 0),
+      note TEXT,
+      CHECK ((article_id IS NULL) <> (sub_recipe_id IS NULL))
+    );
+    CREATE INDEX idx_rl_version ON recipe_lines(version_id);
+    CREATE TABLE sales_imports (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      location_id INTEGER NOT NULL REFERENCES locations(id),
+      period_from TEXT NOT NULL,
+      period_to TEXT NOT NULL,
+      source TEXT NOT NULL,
+      file_name TEXT,
+      file_sha256 TEXT NOT NULL,
+      total_cents INTEGER,
+      line_count INTEGER NOT NULL,
+      status TEXT NOT NULL DEFAULT 'aktivan' CHECK (status IN ('aktivan','storniran')),
+      storno_reason TEXT,
+      storno_at TEXT,
+      created_by INTEGER REFERENCES users(id),
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      CHECK (period_from <= period_to)
+    );
+    CREATE INDEX idx_si_hash ON sales_imports(file_sha256);
+    CREATE TABLE sales_lines (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      import_id INTEGER NOT NULL REFERENCES sales_imports(id),
+      sale_date TEXT,
+      sale_code TEXT,
+      sale_name TEXT NOT NULL,
+      category TEXT,
+      qty_e4 INTEGER NOT NULL,
+      price_cents INTEGER,
+      total_cents INTEGER,
+      source_ref TEXT
+    );
+    CREATE INDEX idx_sl_import ON sales_lines(import_id);
+    CREATE INDEX idx_sl_ref ON sales_lines(source_ref);
+  ` },
 ];
 
 function migrate(db) {
