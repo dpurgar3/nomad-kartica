@@ -38,6 +38,8 @@ test('parsiranje hrvatskih brojeva bez pomičnog zareza', () => {
   assert.equal(e4('1,5'), 15000);
   assert.equal(e4('1.234,56'), 12345600);
   assert.equal(e4('0,33'), 3300);
+  assert.equal(e4('0.008'), 80); // točka bez zareza je decimalna točka, ne tisućice
+  assert.equal(e4('1.234'), 12340);
   assert.equal(e4('-1,0844'), -10844);
   assert.equal(e4('2,00005'), 20001); // zaokruživanje na 4 decimale
   assert.equal(e4(''), null);
@@ -336,4 +338,170 @@ test('glasovni unos: prepoznavanje artikla i pakiranja', () => {
   assert.deepEqual(V.resolveUnit({ pack: 'gajb' }, art), { packagingId: 7, label: 'Gajba 24' });
   assert.ok(V.resolveUnit({ pack: 'boc' }, art).error);
   assert.deepEqual(V.resolveUnit({ unit: 'l' }, { unit: 'kom' }), { unit: 'l', label: 'l' });
+});
+
+// ======================= NORMATIVI, PRODAJA, UTROŠAK =======================
+const { createConsumption } = require('../inventura/consumption');
+const SC = require('../inventura/salescsv');
+const { parseSalesItems } = require('../inventura/remaris');
+
+function cafe() {
+  const { db, svc } = fresh();
+  const kava = svc.createArticle({ code: 'KAVA', name: 'Kava zrno', unit: 'kg', purchase_price: '20' }, 1);
+  const mlijeko = svc.createArticle({ code: 'MLI', name: 'Mlijeko', unit: 'l', purchase_price: '1' }, 1);
+  const secer = svc.createArticle({ code: 'SEC', name: 'Šećer vrećica', unit: 'kom', purchase_price: '0,02' }, 1);
+  const sok = svc.createArticle({ code: '2006', name: 'Sok 0,25', unit: 'kom', purchase_price: '0,8' }, 1);
+  const cons = createConsumption(db, svc);
+  const espresso = cons.saveVersion({ sale_code: '1000', name: 'Espresso', valid_from: '2026-01-01', lines: [{ article_id: kava, qty: '8', unit: 'g' }, { article_id: secer, qty: '1' }] }, 1).recipeId;
+  const bijela = cons.saveVersion({ sale_code: '1016', name: 'Kava s mlijekom', valid_from: '2026-01-01', lines: [{ sub_recipe_id: espresso, qty: '1' }, { article_id: mlijeko, qty: '0,15' }] }, 1).recipeId;
+  return { db, svc, cons, kava, mlijeko, secer, sok, espresso, bijela, loc: svc.defaultLocation().id };
+}
+const sale = (code, name, qty, date, ref) => ({ code, name, qty, date, ref });
+
+test('normativ: jedinice se preračunavaju, podnormativi se rastavljaju, gubitak pripreme', () => {
+  const { cons, kava, mlijeko, secer, bijela } = cafe();
+  const acc = new Map(); cons.explode(bijela, '2026-05-01', e4('10'), acc);
+  assert.equal(acc.get(kava), e4('0,08')); // 10 × 8 g = 0,08 kg
+  assert.equal(acc.get(mlijeko), e4('1,5'));
+  assert.equal(acc.get(secer), e4('10'));
+  const r = cons.saveVersion({ sale_code: '1100', name: 'Limunada', yield_loss_pct: '10', lines: [{ article_id: mlijeko, qty: '0,2' }] }, 1);
+  const a2 = new Map(); cons.explode(r.recipeId, '2099-01-01', e4('10'), a2);
+  assert.equal(a2.get(mlijeko), e4('2,2')); // 2 l + 10 % gubitka
+  assert.equal(cons.portionCost(bijela, '2026-05-01'), 33); // 0,16 € kava + 0,02 € šećer + 0,15 € mlijeko
+});
+
+test('normativ: verzije čuvaju povijest, prodaja koristi verziju važeću na datum prodaje', () => {
+  const { cons, db, kava, espresso } = cafe();
+  cons.saveVersion({ recipeId: espresso, valid_from: '2026-06-01', lines: [{ article_id: kava, qty: '0,009' }] }, 1);
+  assert.throws(() => cons.saveVersion({ recipeId: espresso, valid_from: '2026-06-01', lines: [{ article_id: kava, qty: '0,01' }] }, 1), /već postoji/);
+  assert.equal(cons.versionAt(espresso, '2026-05-31').version, 1);
+  assert.equal(cons.versionAt(espresso, '2026-06-01').version, 2);
+  assert.equal(cons.versionAt(espresso, '2025-12-31'), null);
+  const v1 = cons.recipeDetail(espresso).versions.find(v => v.version === 1);
+  assert.equal(v1.lines.find(l => l.article_id === kava).qty_e4, e4('0,008')); // stara verzija nepromijenjena
+  cons.importSales({ period_from: '2026-05-01', period_to: '2026-06-30', file_sha256: 'x1', source: 'CSV',
+    lines: [sale('1000', 'Espresso', '100', '2026-05-15'), sale('1000', 'Espresso', '100', '2026-06-15')] }, 1);
+  const t = cons.theoretical({ from: '2026-05-01', to: '2026-06-30' });
+  assert.equal(t.articles.find(a => a.article_id === kava).qty_e4, e4('1,7')); // 100×0,008 + 100×0,009
+  assert.equal(db.prepare('SELECT COUNT(*) n FROM recipe_versions WHERE recipe_id=?').get(espresso).n, 2);
+});
+
+test('normativ: kružne ovisnosti i neispravni sastojci se odbijaju', () => {
+  const { cons, kava, espresso, bijela } = cafe();
+  assert.throws(() => cons.saveVersion({ recipeId: espresso, valid_from: '2026-03-01', lines: [{ sub_recipe_id: bijela, qty: '1' }] }, 1), /Kružna/);
+  assert.throws(() => cons.saveVersion({ recipeId: espresso, valid_from: '2026-03-01', lines: [{ sub_recipe_id: espresso, qty: '1' }] }, 1), /sam sebe/);
+  assert.throws(() => cons.saveVersion({ recipeId: espresso, valid_from: '2026-03-01', lines: [{ article_id: kava, qty: '1', unit: 'l' }] }, 1), /nisu usporedive/);
+  assert.throws(() => cons.saveVersion({ recipeId: espresso, valid_from: '2026-03-01', lines: [{ article_id: kava, qty: '0' }] }, 1), /pozitivan/);
+  assert.throws(() => cons.saveVersion({ recipeId: espresso, valid_from: '2026-03-01', lines: [] }, 1), /barem jedan/);
+  assert.throws(() => cons.saveVersion({ sale_code: '1000', name: 'Dupli', lines: [{ article_id: kava, qty: '1' }] }, 1), /već postoji/);
+});
+
+test('uvoz prodaje: deduplikacija datoteke, preklapanje razdoblja, storno i ponovni uvoz', () => {
+  const { cons } = cafe();
+  const base = { period_from: '2026-01-01', period_to: '2026-01-31', source: 'CSV', lines: [sale('1000', 'Espresso', '10')] };
+  const r = cons.importSales({ ...base, file_sha256: 'A' }, 1);
+  assert.throws(() => cons.importSales({ ...base, file_sha256: 'A' }, 1), /već uvezena/);
+  assert.throws(() => cons.importSales({ ...base, file_sha256: 'B', period_from: '2026-01-15', period_to: '2026-02-15' }, 1), /preklapa/);
+  assert.ok(cons.importSales({ ...base, file_sha256: 'B', period_from: '2026-02-01', period_to: '2026-02-28' }, 1).id);
+  assert.throws(() => cons.stornoImport(r.id, '', 1), /razlog/);
+  cons.stornoImport(r.id, 'pogrešna datoteka', 1);
+  assert.equal(cons.salesImports().find(i => i.id === r.id).status, 'storniran'); // ostaje u povijesti
+  assert.ok(cons.importSales({ ...base, file_sha256: 'A' }, 1).id); // nakon storna dopušteno
+  assert.throws(() => cons.importSales({ ...base, file_sha256: 'C', period_from: '2026-03-01', period_to: '2026-03-31', lines: [sale('1000', 'Espresso', 'deset')] }, 1), /pogrešku/);
+  assert.throws(() => cons.importSales({ ...base, file_sha256: 'D', period_from: '2026-03-01', period_to: '2026-03-31', reported_total_cents: 999, lines: [{ ...sale('1000', 'Espresso', '1'), total_cents: 180 }] }, 1), /ne odgovara/);
+});
+
+test('uvoz prodaje: ista stavka računa ne može se uvesti dvaput; povrat smanjuje utrošak', () => {
+  const { cons, kava, sok } = cafe();
+  cons.importSales({ period_from: '2026-04-01', period_to: '2026-04-01', file_sha256: 'R1', source: 'CSV',
+    lines: [sale('1000', 'Espresso', '3', '2026-04-01', 'R-1'), sale('2006', 'Sok', '2', '2026-04-01', 'R-1')] }, 1);
+  const dry = cons.importSales({ period_from: '2026-04-02', period_to: '2026-04-02', file_sha256: 'R2', source: 'CSV',
+    lines: [sale('1000', 'Espresso', '1', '2026-04-02', 'R-1'), sale('1000', 'Espresso', '-1', '2026-04-02', 'R-2')] }, 1, { dryRun: true });
+  assert.equal(dry.errors.length, 1); assert.match(dry.errors[0].error, /već uvezena/);
+  cons.importSales({ period_from: '2026-04-02', period_to: '2026-04-02', file_sha256: 'R3', source: 'CSV', lines: [sale('1000', 'Espresso', '-1', '2026-04-02', 'R-2')] }, 1);
+  const t = cons.theoretical({ from: '2026-04-01', to: '2026-04-30' });
+  assert.equal(t.articles.find(a => a.article_id === kava).qty_e4, e4('0,016')); // 3 − 1 povrat = 2 espressa
+  assert.equal(t.articles.find(a => a.article_id === sok).qty_e4, e4('2')); // bez normativa: 1 : 1 po šifri artikla
+  const t2 = cons.theoretical({ from: '2026-04-02', to: '2026-04-30' });
+  assert.equal(t2.excluded.length, 0); assert.equal(t2.imports.length, 1);
+});
+
+test('teorijski utrošak: prodaja bez normativa i uvoz koji samo djelomično pada u razdoblje', () => {
+  const { cons } = cafe();
+  cons.importSales({ period_from: '2026-01-01', period_to: '2026-01-31', file_sha256: 'P', source: 'PDF', lines: [sale('9999', 'Nepoznato piće', '5'), sale('1000', 'Espresso', '10')] }, 1);
+  const t = cons.theoretical({ from: '2026-01-01', to: '2026-01-31' });
+  assert.equal(t.unmatched.length, 1); assert.equal(t.unmatched[0].name, 'Nepoznato piće');
+  const part = cons.theoretical({ from: '2026-01-10', to: '2026-01-31' });
+  assert.equal(part.imports.length, 0); assert.equal(part.excluded.length, 1); assert.equal(part.articles.length, 0);
+});
+
+test('kontrola utroška: stvarni = početno + nabava − završno; odstupanje odvojeno od otpisa', () => {
+  const { cons, svc, kava, mlijeko, loc } = cafe();
+  // početna inventura 31.1.: kava 2 kg, mlijeko 10 l
+  const i1 = svc.createInventory({ date: '2026-01-31' }, 1);
+  for (const it of svc.inventoryItems(i1)) if (it.article_id === kava) svc.setCount(it.id, { qty: '2' }, 1); else if (it.article_id === mlijeko) svc.setCount(it.id, { qty: '10' }, 1);
+  svc.closeInventory(i1, { allowUncounted: true }, 1);
+  svc.addMovement({ articleId: kava, type: 'nabava', qty: '5', date: '2026-02-10' }, 1);
+  svc.addMovement({ articleId: kava, type: 'otpis', qty: '0,2', reason: 'prolivena', date: '2026-02-12' }, 1);
+  cons.importSales({ period_from: '2026-02-01', period_to: '2026-02-28', file_sha256: 'F', source: 'CSV', lines: [sale('1016', 'Kava s mlijekom', '500')] }, 1);
+  const i2 = svc.createInventory({ date: '2026-02-28' }, 1);
+  for (const it of svc.inventoryItems(i2)) if (it.article_id === kava) svc.setCount(it.id, { qty: '2,5' }, 1); else if (it.article_id === mlijeko) svc.setCount(it.id, { qty: '30' }, 1);
+  svc.closeInventory(i2, { allowUncounted: true }, 1);
+  const c = cons.compare({ locationId: loc, startId: String(i1), endId: String(i2) });
+  const k = c.rows.find(r => r.article_id === kava);
+  assert.equal(k.actual_e4, e4('4,5'));        // 2 + 5 − 2,5
+  assert.equal(k.theoretical_e4, e4('4'));     // 500 × 8 g
+  assert.equal(k.losses_e4, e4('0,2'));
+  assert.equal(k.unexplained_e4, e4('0,3'));   // 4,5 − 4 − 0,2
+  assert.equal(k.unexplained_cents, 600);      // 0,3 kg × 20 €
+  assert.equal(k.unexplained_pct_e4, e4('7,5'));
+  const m = c.rows.find(r => r.article_id === mlijeko);
+  assert.equal(m.actual_e4, e4('-20'));        // nabava mlijeka nije upisana → negativni stvarni utrošak
+  assert.ok(c.warnings.some(w => /Nabava/.test(w)));
+  assert.throws(() => cons.compare({ locationId: loc, startId: String(i2), endId: String(i1) }), /nakon/);
+});
+
+test('CSV prodaje: separator, navodnici, datumi, mapiranje i pogreške po retku', () => {
+  const csv = '﻿Datum;Račun;Šifra;Artikl;Količina;Iznos\r\n9.10.2026. 14:30;R-1;1000;"Espresso; kratki";2;3,60\r\n2026-10-10;R-2;1016;Kava;1,5;3,60\r\n31.2.2026;R-3;1000;Espresso;1;1,80\r\n10.10.2026;R-4;1000;Espresso;x;1,80\r\n';
+  const { delimiter, rows } = SC.parseCsv(csv);
+  assert.equal(delimiter, ';'); assert.equal(rows.length, 5); assert.equal(rows[1][3], 'Espresso; kratki');
+  const map = SC.guessMapping(rows[0]);
+  assert.deepEqual([map.date, map.ref, map.code, map.name, map.qty, map.total], [0, 1, 2, 3, 4, 5]);
+  const r = SC.mapRows(rows, map);
+  assert.equal(r.lines.length, 2); assert.equal(r.errors.length, 2);
+  assert.equal(r.errors[0].row, 4); assert.match(r.errors[0].error, /Datum/);
+  assert.match(r.errors[1].error, /Količina/);
+  assert.equal(r.period_from, '2026-10-09'); assert.equal(r.period_to, '2026-10-10');
+  assert.equal(r.lines[0].total_cents, 360);
+  assert.equal(SC.parseDate('2026-02-30'), null);
+});
+
+test('Remaris PDF „Promet po artiklima”: razdoblje, stavke i ukupno', () => {
+  const els = [
+    { page: 1, x: 200, y: 700, str: 'za razdoblje 1.1.2026. - 30.9.2026.' },
+    { page: 1, x: 39, y: 565, str: 'Kave' },
+    { page: 1, x: 31, y: 548, str: '1000' }, { page: 1, x: 81, y: 548, str: '(635(662\u0003.$9$\u0003.5$û$' }, { page: 1, x: 334, y: 548, str: '2.680,00' }, { page: 1, x: 410, y: 548, str: '1,80 EUR' }, { page: 1, x: 485, y: 548, str: '4.824,00 EUR' },
+    { page: 1, x: 31, y: 531, str: '1000' }, { page: 1, x: 81, y: 531, str: 'KAVA ESPRESSO' }, { page: 1, x: 354, y: 531, str: '-1,00' }, { page: 1, x: 410, y: 531, str: '1,80 EUR' }, { page: 1, x: 505, y: 531, str: '-1,80 EUR' },
+    { page: 1, x: 300, y: 300, str: 'Ukupno artikli: 4.822,20 EUR' },
+  ];
+  const r = parseSalesItems(els);
+  assert.equal(r.period_from, '2026-01-01'); assert.equal(r.period_to, '2026-09-30'); assert.equal(r.total_cents, 482220);
+  assert.equal(r.lines.length, 2);
+  assert.deepEqual(r.lines[0], { code: '1000', name: 'ESPRESSO KAVA KRAĆA', category: 'Kave', qty: '2680.00', price_cents: 180, total_cents: 482400 });
+  assert.equal(r.lines[1].qty, '-1.00'); assert.equal(r.lines[1].total_cents, -180);
+});
+
+test('stvarni Remaris normativi i promet: uvoz bez pogreške i zbroj jednak izvještaju', { skip: !process.env.REMARIS_PROMET }, async () => {
+  const { parseSalesPdf } = require('../inventura/remaris');
+  const { db, svc } = fresh(true);
+  const cons = createConsumption(db, svc);
+  assert.ok(cons.seedRecipesIfEmpty(JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'inventura', 'seed', 'normativi-remaris.json'), 'utf8')), 1));
+  assert.equal(db.prepare('SELECT COUNT(*) n FROM recipes').get().n, 127);
+  const buf = fs.readFileSync(process.env.REMARIS_PROMET);
+  const p = await parseSalesPdf(buf);
+  const r = cons.importSales({ period_from: p.period_from, period_to: p.period_to, lines: p.lines, reported_total_cents: p.total_cents, file_sha256: cons.sha256(buf), source: 'PDF' }, 1);
+  assert.equal(r.total_cents, 12488054);
+  const t = cons.theoretical({ from: '2026-01-01', to: '2026-09-30' });
+  const kava = t.articles.find(a => a.name.startsWith('Kava Zadužna'));
+  assert.ok(kava.qty_e4 > e4('100') && kava.qty_e4 < e4('200'), 'kava ' + kava.qty_e4);
 });
