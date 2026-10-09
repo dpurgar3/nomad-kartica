@@ -127,8 +127,8 @@ async function reloadMeta() { S.meta = await api('/meta'); }
 // ---------- usmjeravanje ----------
 const ROUTES = {};
 async function route() {
-  const [r, arg] = location.hash.replace(/^#\/?/, '').split('/');
-  $$('#side a').forEach(a => a.classList.toggle('on', a.dataset.r === (r === 'inventura' ? 'povijest' : r)));
+  const [r, arg] = location.hash.replace(/^#\/?/, '').split('?')[0].split('/');
+  $$('#side a').forEach(a => a.classList.toggle('on', a.dataset.r === ({ inventura: 'povijest', normativ: 'normativi' }[r] || r)));
   $('#side').classList.remove('open');
   view.innerHTML = '<p class="muted">Učitavam…</p>';
   try { await (ROUTES[r] || ROUTES[''])(arg); } catch (e) { if (e.message !== 'Prijavi se.') view.innerHTML = `<p class="err">${esc(e.message)}</p>`; }
