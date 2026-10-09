@@ -214,12 +214,8 @@ app.post('/api/scan', express.json({ limit: '6mb' }), auth, limit('scan', 20, 36
   const r = parseReceipt(req.body.qr);
   if (r.error) return res.status(400).json({ error: r.error });
   const now = Date.now();
-  // brze provjere prije čitanja OIB-a (štedi server)
+  // prvo OIB (je li račun iz NOMAd-a), zatim ostala pravila (već iskorišten, 1 dnevno)
   if (now - r.when.getTime() <= CFG.receiptMaxAgeHours * 3600e3 && r.when.getTime() <= now + 3600e3) {
-    if (db.prepare('SELECT 1 FROM receipts WHERE receipt_key=?').get(r.key))
-      return res.status(409).json({ error: 'Ovaj račun je već iskorišten.' });
-    if (db.prepare('SELECT COUNT(*) AS n FROM receipts WHERE user_id=? AND zg_day=?').get(req.user.id, zgDay()).n >= CFG.maxReceiptsPerDay)
-      return res.status(429).json({ error: CFG.maxReceiptsPerDay === 1 ? 'Danas si već skenirao račun. Vidimo se sutra!' : 'Dosegnut je dnevni broj računa.' });
     const oib = await checkOibPhoto(Buffer.from(m[2], 'base64'), CFG.oib);
     if (oib.error) return res.status(400).json({ error: oib.error, code: oib.code });
   }
