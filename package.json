@@ -4,7 +4,7 @@
   "description": "NOMAd Caffe Bar – kartica vjernosti",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test test/*.test.js",
     "start": "node server.js"
   },
   "keywords": [],
@@ -17,6 +17,7 @@
     "html5-qrcode": "^2.3.8",
     "jimp": "^0.22.12",
     "jsqr": "^1.4.0",
+    "pdfjs-dist": "^4.10.38",
     "qrcode": "^1.5.4",
     "tesseract.js": "^5.1.1"
   },

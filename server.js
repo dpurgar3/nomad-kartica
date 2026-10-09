@@ -156,7 +156,14 @@ setInterval(() => { const now = Date.now(); for (const [k, a] of hits) if (!a.so
 const app = express();
 app.set('trust proxy', 1);
 const smallJson = express.json({ limit: '10kb' });
-app.use((req, res, next) => (req.path === '/api/scan' ? next() : smallJson(req, res, next)));
+app.use((req, res, next) => (req.path === '/api/scan' || req.path.startsWith('/inventura') ? next() : smallJson(req, res, next)));
+// ---------- Inventura (zasebna baza data/inventura.db) ----------
+const inventura = require('./inventura/routes').createInventura({
+  dbFile: process.env.INVENTURA_DB_FILE || path.join(path.dirname(CFG.dbFile), 'inventura.db'),
+  envPin: process.env.INVENTURA_PIN || '',
+  adminPin: CFG.adminPin,
+});
+app.use('/inventura', inventura.router);
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 app.use('/vendor/html5-qrcode.min.js', (req, res) =>
   res.sendFile(path.join(__dirname, 'node_modules', 'html5-qrcode', 'html5-qrcode.min.js')));
