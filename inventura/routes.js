@@ -14,6 +14,7 @@ const crypto = require('crypto');
 const { createConsumption } = require('./consumption');
 const SC = require('./salescsv');
 const D = require('./decimal');
+const photo = require('./photo');
 
 const SEED = path.join(__dirname, 'seed', 'stanje-2026-10-09.json');
 const SEED_RECIPES = path.join(__dirname, 'seed', 'normativi-remaris.json');
@@ -118,6 +119,16 @@ function createInventura({ dbFile, envPin = '', adminPin = '', seed = true } = {
   router.delete('/api/counts/:id', h(req => { svc.deleteCount(Number(req.params.id), uid(req)); return { ok: true }; }));
   router.put('/api/items/:id/note', h(req => { svc.setItemNote(Number(req.params.id), req.body?.note); return { ok: true }; }));
   router.post('/api/items/:id/correct', h(req => { svc.correctItem(Number(req.params.id), req.body || {}, uid(req)); return { ok: true }; }));
+  // brojanje sa slike (AI): vraća prijedlog, ništa ne upisuje
+  router.post('/api/inventories/:id/photo', express.raw({ type: () => true, limit: '8mb' }), h(async req => {
+    const id = Number(req.params.id);
+    const inv = svc.inventory(id);
+    if (!inv) throw new InvError('Inventura ne postoji.', 404);
+    if (inv.status !== 'u_tijeku') throw new InvError('Inventura je zaključena.');
+    if (!Buffer.isBuffer(req.body) || !req.body.length) throw new InvError('Slika nije stigla.');
+    const mediaType = String(req.get('Content-Type') || '').split(';')[0].trim().toLowerCase();
+    return photo.countFromPhoto({ image: req.body.toString('base64'), mediaType, items: svc.inventoryItems(id), hint: String(req.query.hint || '') });
+  }));
 
   // ---------- normativi ----------
   router.get('/api/recipes', h(req => cons.recipes({ search: req.query.q })));
