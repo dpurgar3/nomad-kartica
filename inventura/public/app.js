@@ -400,10 +400,12 @@ ROUTES.inventura = async id => {
     <div class="row no-print" style="margin-top:10px">
       <input type="search" id="iq" class="grow" placeholder="Traži artikl…" value="${esc(IF.q)}">
       ${open && VOICE ? `<button type="button" class="btn primary mic" id="cntMic" title="Glasovno brojanje">🎤 Izgovori</button>` : ''}
+      ${open ? `<label class="btn primary mic" id="cntCam" title="Brojanje sa slike">📷 Slikaj<input type="file" id="cntCamFile" accept="image/*" capture="environment" hidden></label>` : ''}
       <select id="ishow"><option value="sve">Svi</option><option value="neprebrojano">Neprebrojani</option><option value="razlike">Samo razlike</option><option value="prebrojano">Prebrojani</option></select>
     </div></div>
     ${open && VOICE ? `<p class="muted small no-print">Glasovno brojanje: pritisni 🎤 i reci naziv i količinu, npr. „coca cola dvadeset četiri”, „jamnica dvije gajbe”, „limun jedan i pol kila”. Prije upisa potvrđuješ.</p>` : ''}
     ${open && !VOICE ? `<p class="muted small no-print">Glasovni unos nije podržan u ovom pregledniku (koristi Chrome ili Safari).</p>` : ''}
+    ${open ? `<p class="muted small no-print">Brojanje sa slike: pritisni 📷 i uslikaj policu ili hladnjak. AI prepozna artikle s popisa i predloži količine, a ti ih prije upisa provjeriš.</p>` : ''}
     ${s.unpricedDiffs ? `<p class="note">${s.unpricedDiffs} razlika nema nabavnu cijenu pa nisu uključene u vrijednost. Dodaj cijenu u Artiklima.</p>` : ''}
     <div class="tbl-wrap"><table id="cntT"><thead><tr><th>Artikl</th><th class="num">Očekivano</th><th>${open ? 'Unos' : ''}</th><th class="num">Prebrojano</th><th class="num">Razlika</th><th class="num">Vrijednost</th></tr></thead><tbody></tbody></table></div>`;
   $('#ishow').value = IF.show;
@@ -472,6 +474,42 @@ ROUTES.inventura = async id => {
   $('#cntT').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('.cnt input')) { e.preventDefault(); e.target.closest('tr').querySelector('[data-act=set]').click(); } });
 
   if (open && $('#cntMic')) $('#cntMic').onclick = () => startVoice($('#cntMic'), texts => voiceCount(texts));
+  if (open && $('#cntCamFile')) $('#cntCamFile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) photoCount(f); };
+  async function photoCount(file) {
+    const cam = $('#cntCam'); cam.classList.add('on'); toast('Prepoznajem artikle na slici…');
+    let r;
+    try { r = await Photo.recognize(id, file); } catch (x) { return fail(x); } finally { cam.classList.remove('on'); }
+    const rows = r.items.map((x, k) => ({ x, k, it: d.items.find(i => i.id === x.itemId) })).filter(o => o.it);
+    if (!rows.length) return toast('Na slici nisam prepoznao artikle s popisa.' + (r.unknown.length ? ' Vidim: ' + r.unknown.join(', ') : ''), true);
+    const SURE = { visoka: 'slaze_se', srednja: 'open', niska: 'manjak' };
+    const unitOpts = (it, pid) => `<option value="">${esc(it.unit)}</option>` + Object.entries(S.meta.units).filter(([k, u]) => u.dim === S.meta.units[it.unit].dim && k !== it.unit).map(([k]) => `<option value="u:${k}">${k}</option>`).join('') + it.packagings.map(x => `<option value="p:${x.id}" ${x.id === pid ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
+    dialog(`<h2>📷 Prepoznato na slici</h2>
+      <p class="muted small">Provjeri i po potrebi ispravi količine. Upisuju se samo označeni artikli.</p>
+      <div class="tbl-wrap"><table><thead><tr><th></th><th>Artikl</th><th>Količina</th><th>Jedinica</th><th>Sigurnost</th></tr></thead><tbody>
+      ${rows.map(({ x, it, k }) => `<tr><td><input type="checkbox" name="on${k}" ${x.sure === 'niska' ? '' : 'checked'} aria-label="Upiši"></td>
+        <td>${esc(it.name)} <div class="muted small">prebrojano ${it.counted_qty_e4 == null ? 'ništa' : fq(it.counted_qty_e4) + ' ' + esc(it.unit)}</div>${x.note ? `<div class="small muted">📝 ${esc(x.note)}</div>` : ''}</td>
+        <td><input name="q${k}" inputmode="decimal" style="width:6em" value="${String(x.qty).replace('.', ',')}" aria-label="Količina"></td>
+        <td><select name="u${k}" aria-label="Jedinica">${unitOpts(it, x.packagingId)}</select></td>
+        <td><span class="chip ${SURE[x.sure] || ''}">${esc(x.sure)}</span></td></tr>`).join('')}
+      </tbody></table></div>
+      ${r.unknown.length ? `<p class="note small">Nije s popisa: ${r.unknown.map(esc).join(', ')}</p>` : ''}
+      <div class="row end">${cancelBtn()}<button class="btn" value="add" title="Dodaj na već prebrojano">+ Dodaj</button><button class="btn primary" value="set" title="Postavi kao ukupnu količinu">= Postavi</button></div>`,
+    async (fd, b) => {
+      const done = new Set(); let n = 0;
+      for (const { it, k } of rows) {
+        if (fd.get('on' + k) !== 'on') continue;
+        const q = String(fd.get('q' + k) || '').trim(); if (!q) continue;
+        const u = fd.get('u' + k) || '';
+        const put = b === 'set' && !done.has(it.id); done.add(it.id);
+        try { await api(`/items/${it.id}/count`, { method: put ? 'PUT' : 'POST', body: { qty: q, unit: u.startsWith('u:') ? u.slice(2) : undefined, packagingId: u.startsWith('p:') ? Number(u.slice(2)) : undefined } }); }
+        catch (x) { throw new Error(`${it.name}: ${x.message}` + (n ? ` (${n} artikala je već upisano i odznačeno)` : '')); }
+        n++; const cb = $(`#dlgForm [name=on${k}]`); if (cb) cb.checked = false;
+      }
+      if (!n) throw new Error('Nijedan artikl nije označen.');
+      toast(`Upisano artikala: ${n}`);
+      await reload();
+    }, { wide: true });
+  }
   function voiceCount(texts) {
     let p = null, cands = [], heard = texts[0];
     for (const t of texts) { const pp = Voice.parseUtterance(t); const c = Voice.matchArticles(pp.query, d.items); if (c.length && pp.qty != null) { p = pp; cands = c; heard = t; break; } if (!p && c.length) { p = pp; cands = c; heard = t; } }
