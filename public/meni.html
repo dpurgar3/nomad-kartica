@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NOMAd · meni za terasu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --zelena:#1F3D2B; --zelena2:#2C5239; --krem:#FFF6E4;
+  --sunce:#FFC93C; --koralj:#FF6B5A; --nebo:#4CC3E0; --malina:#E2456E; --menta:#4FD1A5;
+  --akcent:var(--sunce);
+  --serif:'Young Serif',Georgia,'Times New Roman',serif;
+  --sans:'Figtree','Segoe UI',Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--zelena);overflow:hidden;cursor:none}
+body{font-family:var(--sans);color:var(--krem)}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:center;display:grid;grid-template-columns:720px 1fr}
+
+/* ---- lijevo: Rabuzinov krajolik s terasom ---- */
+#land{position:relative;overflow:hidden;background:linear-gradient(#7FD0E8 0%,#BDE8F0 38%,#FFF4D6 60%)}
+#land>svg{position:absolute;inset:0;width:100%;height:100%}
+.oblak{animation:plovi 70s linear infinite}
+.oblak.b{animation-duration:95s;animation-delay:-40s}
+.oblak.c{animation-duration:120s;animation-delay:-80s}
+@keyframes plovi{from{transform:translateX(-260px)}to{transform:translateX(860px)}}
+.sunce{transform-origin:600px 150px;animation:okret 80s linear infinite}
+@keyframes okret{to{transform:rotate(360deg)}}
+.stablo{transform-box:fill-box;transform-origin:50% 100%;animation:njihaj 9s ease-in-out infinite alternate}
+.stablo:nth-of-type(2n){animation-duration:11s;animation-delay:-3s}
+@keyframes njihaj{from{transform:rotate(-1.4deg)}to{transform:rotate(1.4deg)}}
+.suncobran{transform-box:fill-box;transform-origin:50% 100%;animation:njihaj 7s ease-in-out infinite alternate}
+#predmet{transition:opacity .5s ease,transform .7s cubic-bezier(.3,1.5,.5,1);transform-box:fill-box;transform-origin:50% 100%}
+#predmet.skriven{opacity:0;transform:scale(.6)}
+#brand{position:absolute;left:60px;top:54px;color:var(--zelena)}
+#brand .ime{font-family:var(--serif);font-size:104px;line-height:.9;letter-spacing:-1px}
+#brand .pod{font-size:28px;font-weight:700;margin-top:12px;color:var(--malina)}
+
+/* ---- desno: meni ---- */
+#meni{position:relative;padding:84px 110px 80px 96px;background:var(--zelena)}
+#meni::before{content:"";position:absolute;left:0;top:0;bottom:0;width:18px;transition:background .6s;
+  background:repeating-linear-gradient(var(--akcent) 0 26px,transparent 26px 52px)}
+#glava{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:30px}
+#kat{font-family:var(--serif);font-weight:400;font-size:88px;line-height:1;color:var(--krem)}
+#kat::after{content:"";display:block;width:180px;height:12px;border-radius:6px;margin-top:18px;background:var(--akcent);transition:background .6s}
+#napomena{font-size:30px;color:var(--nebo);text-align:right;line-height:1.3}
+#stupci{display:flex;justify-content:flex-end;gap:0;font-size:22px;font-weight:700;color:rgba(255,246,228,.55);margin-bottom:4px}
+#stupci span{width:170px;text-align:right}
+#lista{list-style:none}
+#lista li{display:flex;align-items:baseline;font-size:42px;line-height:1.16;padding:10px 0;
+  opacity:0;transform:translateX(30px);transition:opacity .5s ease,transform .6s ease}
+#lista li.vid{opacity:1;transform:none}
+#lista .naz{font-weight:700}
+#lista .kol{font-size:28px;color:var(--nebo);font-weight:600;margin-left:12px}
+#lista .tocke{flex:1;margin:0 18px;border-bottom:4px dotted rgba(255,246,228,.25);transform:translateY(-10px)}
+#lista .sid,#lista .cij{width:170px;text-align:right;font-variant-numeric:tabular-nums}
+#lista .sid{font-size:32px;font-weight:600;color:rgba(255,246,228,.6)}
+#lista .cij{font-weight:800;color:var(--sunce)}
+#traka{position:absolute;left:96px;right:110px;bottom:46px;height:6px;border-radius:3px;background:rgba(255,246,228,.14);overflow:hidden}
+#traka i{display:block;height:100%;width:0;background:var(--akcent)}
+#alko{position:absolute;left:96px;bottom:118px;display:none;align-items:center;gap:16px;background:var(--malina);color:#fff;font-size:28px;font-weight:800;padding:10px 26px 10px 10px;border-radius:40px}
+#alko.on{display:flex}
+#alko b{display:flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:50%;background:#fff;color:var(--malina);font-size:24px;font-weight:800}
+#dno{position:absolute;left:96px;right:110px;bottom:66px;font-size:22px;line-height:1.35;color:rgba(255,246,228,.62)}
+
+/* ---- ponuda dana ---- */
+#ponuda{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;align-items:center;
+  background:radial-gradient(circle at 75% 50%,#FFE38A 0 30%,var(--krem) 60%);color:var(--zelena);opacity:0;pointer-events:none;transition:opacity 1s ease}
+#ponuda.vid{opacity:1}
+#ponuda .lijevo{padding:0 0 0 140px}
+#ponuda .mala{display:inline-block;font-size:38px;font-weight:800;color:#fff;background:var(--malina);padding:8px 26px 10px;border-radius:40px}
+#ponuda h2{font-family:var(--serif);font-weight:400;font-size:168px;line-height:.95;margin:28px 0 36px}
+#ponuda .cijena{display:inline-block;font-family:var(--serif);font-size:120px;background:var(--zelena);color:var(--sunce);
+  padding:18px 54px 26px;border-radius:120px;transform:rotate(-3deg)}
+#ponuda .sidr{font-size:30px;font-weight:600;margin-top:22px;color:var(--zelena2)}
+#ponuda .opis{font-size:32px;margin-top:20px;color:var(--zelena2);max-width:720px}
+#ponuda h2{font-size:132px!important;margin:20px 0 26px!important}
+#ponuda .cijena{font-size:96px!important;padding:12px 46px 20px!important}
+#kartica{display:flex;align-items:center;gap:30px;margin-top:40px;background:var(--zelena);color:var(--krem);border-radius:36px;padding:24px 36px 24px 24px;max-width:820px;box-shadow:0 0 0 6px var(--sunce)}
+#kartica svg{flex:none;width:210px;height:210px;background:#fff;border-radius:18px;padding:8px}
+#kartica .nas{font-family:var(--serif);font-size:40px;line-height:1.1;color:var(--sunce)}
+#kartica .tekst{font-size:26px;line-height:1.35;margin-top:10px}
+#kartica .tekst b{color:var(--sunce)}
+#ponuda>svg{width:100%;height:1080px}
+.para{animation:para 3.5s ease-in-out infinite}
+.para:nth-child(2){animation-delay:-1.2s}.para:nth-child(3){animation-delay:-2.4s}
+@keyframes para{0%{opacity:0;transform:translateY(20px)}40%{opacity:.85}100%{opacity:0;transform:translateY(-70px)}}
+.mjehur{animation:mjehur 2.6s ease-in infinite}
+.mjehur:nth-child(2){animation-delay:-.9s}.mjehur:nth-child(3){animation-delay:-1.7s}
+@keyframes mjehur{0%{transform:translateY(0);opacity:0}20%{opacity:1}100%{transform:translateY(-70px);opacity:0}}
+
+
+/* ---- teme scena ---- */
+#land .n1{stop-color:var(--n1)} #land .n2{stop-color:var(--n2)} #land .n3{stop-color:var(--n3)}
+#land .n1,#land .n2,#land .n3{transition:stop-color 1.2s}
+#land .b1{fill:var(--b1);transition:fill 1.2s} #land .b2{fill:var(--b2);transition:fill 1.2s}
+#land .d1{fill:var(--d1);transition:fill 1.2s} #land .d2{fill:var(--d2);transition:fill 1.2s} #land .d3{fill:var(--d3);transition:fill 1.2s}
+#land .p1{fill:var(--p1);transition:fill 1s} #land .p2{fill:var(--p2);transition:fill 1s}
+#land .st1 *{stroke:var(--s1);transition:stroke 1s,fill 1s} #land .st1 ellipse{fill:var(--s1);stroke:none}
+#land .st2 *{stroke:var(--s2);transition:stroke 1s,fill 1s} #land .st2 ellipse{fill:var(--s2);stroke:none}
+#land .st1 path:last-child,#land .st2 path:last-child{stroke:#1F3D2B}
+#land .stolnjak{fill:var(--sto);transition:fill 1s} #land .vrata{fill:var(--s2)} #land .v{fill:var(--voce)}
+#land .x{opacity:0;transition:opacity 1.2s}
+#land .x.on{opacity:1}
+#brand{transition:color 1.2s}
+.ptice{animation:ptice 26s linear infinite}
+@keyframes ptice{from{transform:translateX(-300px)}to{transform:translateX(700px)}}
+.balon{animation:balon 8s ease-in-out infinite alternate}
+@keyframes balon{from{transform:translateY(0)}to{transform:translateY(-40px)}}
+.zarulje circle{animation:svijetli 1.6s ease-in-out infinite alternate}
+.zarulje circle:nth-child(2n){animation-delay:-.8s}
+@keyframes svijetli{from{opacity:.45}to{opacity:1}}
+.list{animation:pada 9s linear infinite}
+.l2{animation-delay:-2.5s}.l3{animation-delay:-5s}.l4{animation-delay:-7s}
+@keyframes pada{0%{transform:translate(0,-80px) rotate(0)}100%{transform:translate(-60px,340px) rotate(360deg)}}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="stage">
+  <section id="land" aria-hidden="true">
+    <svg viewBox="0 0 720 1080" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="nebo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="n1"/><stop offset=".4" class="n2"/><stop offset=".62" class="n3"/></linearGradient>
+        <pattern id="tocke" width="26" height="22" patternUnits="userSpaceOnUse"><circle cx="13" cy="11" r="4.5" fill="#1F3D2B" opacity=".3"/></pattern>
+        <pattern id="tocke2" width="22" height="18" patternUnits="userSpaceOnUse"><circle cx="11" cy="9" r="3.6" fill="#FFF6E4" opacity=".55"/></pattern>
+        <pattern id="plocice" width="60" height="60" patternUnits="userSpaceOnUse"><rect width="60" height="60" fill="#F3D9B1"/><rect width="30" height="30" fill="#EBC896"/><rect x="30" y="30" width="30" height="30" fill="#EBC896"/></pattern>
+      </defs>
+      <rect width="720" height="1080" fill="url(#nebo)"/>
+      <!-- zvijezde i mjesec -->
+      <g class="x x-zvijezde" fill="#FFF6E4">
+        <circle cx="80" cy="260" r="3"/><circle cx="210" cy="300" r="2.5"/><circle cx="330" cy="250" r="3.5"/><circle cx="460" cy="300" r="2.5"/><circle cx="140" cy="380" r="2"/><circle cx="520" cy="380" r="3"/><circle cx="660" cy="320" r="2.5"/><circle cx="400" cy="400" r="2"/>
+        <path d="M610 110 a56 56 0 1 0 50 84 a44 44 0 1 1 -50 -84Z" fill="#FFE38A"/>
+      </g>
+      <g class="sunce x x-sunce">
+        <circle cx="600" cy="150" r="58" fill="#FFC93C"/>
+        <g stroke="#FF9F1C" stroke-width="8" stroke-linecap="round">
+          <line x1="600" y1="56" x2="600" y2="74"/><line x1="600" y1="226" x2="600" y2="244"/>
+          <line x1="506" y1="150" x2="524" y2="150"/><line x1="676" y1="150" x2="694" y2="150"/>
+          <line x1="534" y1="84" x2="547" y2="97"/><line x1="653" y1="203" x2="666" y2="216"/>
+          <line x1="666" y1="84" x2="653" y2="97"/><line x1="547" y1="203" x2="534" y2="216"/>
+        </g>
+      </g>
+      <g class="x x-oblaci" fill="#FFFFFF">
+        <g class="oblak"><ellipse cx="120" cy="300" rx="70" ry="34"/><ellipse cx="170" cy="280" rx="54" ry="40"/><ellipse cx="215" cy="302" rx="58" ry="30"/></g>
+        <g class="oblak b"><ellipse cx="80" cy="390" rx="54" ry="26"/><ellipse cx="120" cy="374" rx="44" ry="32"/><ellipse cx="158" cy="392" rx="46" ry="24"/></g>
+        <g class="oblak c"><ellipse cx="60" cy="250" rx="40" ry="20"/><ellipse cx="92" cy="238" rx="34" ry="26"/></g>
+      </g>
+      <g class="x x-ptice" fill="none" stroke="#1F3D2B" stroke-width="4" stroke-linecap="round"><g class="ptice">
+        <path d="M120 330 q12 -12 24 0 q12 -12 24 0"/><path d="M190 300 q10 -10 20 0 q10 -10 20 0"/><path d="M250 345 q9 -9 18 0 q9 -9 18 0"/></g></g>
+      <g class="x x-balon balon">
+        <path d="M150 250 c-60 0 -70 70 -40 110 l30 40 h20 l30 -40 c30 -40 20 -110 -40 -110Z" fill="#E2456E" stroke="#1F3D2B" stroke-width="5"/>
+        <path d="M150 250 c-22 0 -26 70 -12 110 l8 40 M150 250 c22 0 26 70 12 110 l-8 40" fill="#FFC93C" stroke="#1F3D2B" stroke-width="4"/>
+        <path d="M140 400 l-6 24 M160 400 l6 24" stroke="#1F3D2B" stroke-width="3"/><rect x="132" y="424" width="36" height="24" rx="4" fill="#C97B2C" stroke="#1F3D2B" stroke-width="4"/>
+      </g>
+      <g class="x x-lampice"><path d="M0 230 Q180 300 360 236 T720 230" fill="none" stroke="#1F3D2B" stroke-width="3"/>
+        <g class="zarulje"><circle cx="40" cy="248" r="9" fill="#FFC93C"/><circle cx="110" cy="268" r="9" fill="#FF6B5A"/><circle cx="180" cy="277" r="9" fill="#4FD1A5"/><circle cx="250" cy="272" r="9" fill="#FFC93C"/><circle cx="320" cy="252" r="9" fill="#E2456E"/><circle cx="400" cy="232" r="9" fill="#4CC3E0"/><circle cx="470" cy="224" r="9" fill="#FFC93C"/><circle cx="540" cy="226" r="9" fill="#FF6B5A"/><circle cx="610" cy="234" r="9" fill="#4FD1A5"/><circle cx="680" cy="236" r="9" fill="#FFC93C"/></g></g>
+      <g class="x x-zastavice"><path d="M0 220 Q180 290 360 226 T720 220" fill="none" stroke="#1F3D2B" stroke-width="3"/>
+        <path d="M30 232 l20 0 l-10 34Z M100 254 l20 2 l-12 34Z M170 266 l20 0 l-10 34Z M240 262 l20 -2 l-8 34Z M310 244 l20 -4 l-6 34Z M390 222 l20 -2 l-8 34Z M460 214 l20 0 l-10 34Z M530 216 l20 2 l-12 34Z M600 224 l20 2 l-10 34Z M670 226 l20 0 l-10 34Z" fill="#FF6B5A" stroke="#1F3D2B" stroke-width="2"/>
+        <path d="M100 254 l20 2 l-12 34Z M310 244 l20 -4 l-6 34Z M530 216 l20 2 l-12 34Z" fill="#4CC3E0"/><path d="M170 266 l20 0 l-10 34Z M460 214 l20 0 l-10 34Z M670 226 l20 0 l-10 34Z" fill="#FFC93C"/></g>
+      <!-- brežuljci -->
+      <path class="b1" d="M0 560 C120 480 260 480 380 540 S620 600 720 520 V1080 H0Z"/>
+      <path d="M0 560 C120 480 260 480 380 540 S620 600 720 520 V1080 H0Z" fill="url(#tocke)"/>
+      <g class="x x-vinograd" stroke="#6B4A2E" stroke-width="4">
+        <path d="M60 530 v40 M120 518 v40 M180 512 v40 M240 512 v40 M300 522 v40 M440 560 v40 M500 572 v40 M560 566 v40 M620 548 v40"/>
+        <g fill="#7B3FA0" stroke="none"><circle cx="60" cy="548" r="9"/><circle cx="120" cy="536" r="9"/><circle cx="180" cy="530" r="9"/><circle cx="240" cy="530" r="9"/><circle cx="300" cy="540" r="9"/><circle cx="440" cy="578" r="9"/><circle cx="500" cy="590" r="9"/><circle cx="560" cy="584" r="9"/><circle cx="620" cy="566" r="9"/></g>
+        <g fill="#3FAE5C" stroke="none"><ellipse cx="72" cy="532" rx="12" ry="7"/><ellipse cx="132" cy="520" rx="12" ry="7"/><ellipse cx="192" cy="514" rx="12" ry="7"/><ellipse cx="252" cy="514" rx="12" ry="7"/><ellipse cx="312" cy="524" rx="12" ry="7"/><ellipse cx="452" cy="562" rx="12" ry="7"/><ellipse cx="512" cy="574" rx="12" ry="7"/><ellipse cx="572" cy="568" rx="12" ry="7"/><ellipse cx="632" cy="550" rx="12" ry="7"/></g>
+      </g>
+      <path class="b2" d="M0 650 C160 580 300 590 420 640 S640 690 720 620 V1080 H0Z"/>
+      <path d="M0 650 C160 580 300 590 420 640 S640 690 720 620 V1080 H0Z" fill="url(#tocke2)" opacity=".5"/>
+      <g class="x x-ribnjak"><ellipse cx="560" cy="676" rx="110" ry="22" fill="#4CC3E0" stroke="#1F3D2B" stroke-width="4"/><path d="M510 672 q14 -6 28 0 M580 680 q14 -6 28 0" stroke="#FFF6E4" stroke-width="4" fill="none"/></g>
+      <g class="stablo"><rect x="96" y="500" width="10" height="66" rx="4" fill="#7A4E2D"/><circle class="d1" cx="101" cy="476" r="42"/><circle cx="101" cy="476" r="24" fill="none" stroke="#FFF6E4" stroke-opacity=".6" stroke-width="5"/></g>
+      <g class="stablo"><rect x="250" y="496" width="9" height="54" rx="4" fill="#7A4E2D"/><ellipse class="d2" cx="254" cy="466" rx="28" ry="42"/></g>
+      <g class="stablo"><rect x="470" y="540" width="10" height="60" rx="4" fill="#7A4E2D"/><circle class="d3" cx="475" cy="512" r="38"/><circle cx="475" cy="512" r="20" fill="none" stroke="#FFF6E4" stroke-width="5"/></g>
+      <g class="stablo"><rect x="640" y="500" width="9" height="56" rx="4" fill="#7A4E2D"/><ellipse class="d2" cx="644" cy="470" rx="26" ry="40"/></g>
+      <g class="x x-vocke"><circle class="v" cx="86" cy="462" r="8"/><circle class="v" cx="116" cy="482" r="8"/><circle class="v" cx="96" cy="496" r="7"/><circle class="v" cx="246" cy="452" r="7"/><circle class="v" cx="262" cy="478" r="7"/><circle class="v" cx="462" cy="500" r="7"/><circle class="v" cx="490" cy="522" r="7"/><circle class="v" cx="638" cy="460" r="7"/><circle class="v" cx="650" cy="486" r="7"/></g>
+      <g transform="translate(340 556)"><rect x="0" y="30" width="70" height="52" fill="#FFF6E4"/><path d="M-8 34 L35 0 L78 34Z" fill="#FF6B5A"/><rect x="26" y="52" width="18" height="30" class="vrata"/></g>
+      <g class="x x-lisce"><g class="list l1"><ellipse cx="200" cy="420" rx="10" ry="5" fill="#FF9F1C"/></g><g class="list l2"><ellipse cx="420" cy="400" rx="10" ry="5" fill="#E2456E"/></g><g class="list l3"><ellipse cx="560" cy="430" rx="10" ry="5" fill="#FFC93C"/></g><g class="list l4"><ellipse cx="320" cy="440" rx="9" ry="5" fill="#FF6B5A"/></g></g>
+      <!-- terasa -->
+      <path d="M0 760 Q360 720 720 760 V1080 H0Z" fill="url(#plocice)"/>
+      <path d="M0 760 Q360 720 720 760" fill="none" stroke="#C99A62" stroke-width="6"/>
+      <g class="x x-cvijece">
+        <g transform="translate(20 1000)"><rect x="0" y="0" width="70" height="56" fill="#C9653E" stroke="#1F3D2B" stroke-width="4"/><circle cx="16" cy="-14" r="14" fill="#E2456E"/><circle cx="38" cy="-24" r="14" fill="#FFC93C"/><circle cx="58" cy="-12" r="14" fill="#FF6B5A"/></g>
+        <g transform="translate(630 1000)"><rect x="0" y="0" width="70" height="56" fill="#C9653E" stroke="#1F3D2B" stroke-width="4"/><circle cx="16" cy="-14" r="14" fill="#4CC3E0"/><circle cx="38" cy="-24" r="14" fill="#E2456E"/><circle cx="58" cy="-12" r="14" fill="#FFC93C"/></g>
+      </g>
+      <g class="suncobran">
+        <rect x="355" y="430" width="10" height="400" rx="5" fill="#6B4A2E"/>
+        <path class="p1" d="M120 470 L360 360 L600 470Z"/>
+        <path class="p2" d="M200 470 L360 360 L280 470Z M360 470 L360 360 L440 470Z M520 470 L360 360 L600 470Z"/>
+        <path class="p1" d="M120 470 a40 40 0 0 0 80 0Z M280 470 a40 40 0 0 0 80 0Z M440 470 a40 40 0 0 0 80 0Z" stroke="#1F3D2B" stroke-width="4"/>
+        <path class="p2" d="M200 470 a40 40 0 0 0 80 0Z M360 470 a40 40 0 0 0 80 0Z M520 470 a40 40 0 0 0 80 0Z" stroke="#1F3D2B" stroke-width="4"/>
+        <path d="M120 470 L360 360 L600 470" fill="none" stroke="#1F3D2B" stroke-width="5" stroke-linejoin="round"/>
+        <circle cx="360" cy="356" r="10" fill="#6B4A2E"/>
+      </g>
+      <g stroke-linecap="round">
+        <g transform="translate(70 760)" class="st1">
+          <path d="M20 0 C10 -90 90 -110 110 -20" fill="none" stroke-width="12"/>
+          <path d="M40 -60 L50 0 M70 -72 L72 0 M95 -58 L92 0" stroke-width="7"/>
+          <ellipse cx="70" cy="10" rx="70" ry="18"/>
+          <path d="M18 18 L6 150 M122 18 L134 150 M50 24 L44 140 M92 24 L98 140" stroke="#1F3D2B" stroke-width="8"/>
+        </g>
+        <g transform="translate(510 760)" class="st2">
+          <path d="M30 -20 C50 -110 130 -90 120 0" fill="none" stroke-width="12"/>
+          <path d="M48 -58 L48 0 M73 -72 L70 0 M100 -60 L92 0" stroke-width="7"/>
+          <ellipse cx="70" cy="10" rx="70" ry="18"/>
+          <path d="M18 18 L6 150 M122 18 L134 150 M50 24 L44 140 M92 24 L98 140" stroke="#1F3D2B" stroke-width="8"/>
+        </g>
+      </g>
+      <ellipse cx="360" cy="1000" rx="120" ry="16" fill="#000" opacity=".12"/>
+      <rect x="350" y="826" width="20" height="170" fill="#3B3B3B"/>
+      <ellipse cx="360" cy="996" rx="70" ry="12" fill="#3B3B3B"/>
+      <ellipse class="stolnjak" cx="360" cy="822" rx="200" ry="30" stroke="#1F3D2B" stroke-width="6"/>
+      <path d="M170 830 Q360 870 550 830" fill="none" stroke="#FFF6E4" stroke-width="6" opacity=".6"/>
+      <g transform="translate(360 816)"><g id="predmet"></g></g>
+    </svg>
+    <div id="brand"><div class="ime">NOMAd</div><div class="pod">caffe bar · Kulturni centar Ivan Rabuzin</div></div>
+  </section>
+
+  <section id="meni">
+    <div id="glava"><h1 id="kat"></h1><div id="napomena"></div></div>
+    <div id="stupci"><span>sidrena</span><span>trenutna</span></div>
+    <ul id="lista"></ul>
+    <div id="alko"><b>18+</b>Alkoholna pića ne poslužujemo osobama mlađim od 18 godina.</div>
+    <div id="dno">Cijene u eurima, s PDV-om. Sidrena cijena je cijena od 10.09.2026. (NN 101/2026). <span id="zvj"></span></div>
+    <div id="traka"><i></i></div>
+  </section>
+
+  <section id="ponuda" aria-live="polite">
+    <div class="lijevo">
+      <div class="mala">Ponuda dana</div>
+      <h2>Kava +<br>kroasan</h2>
+      <div class="cijena">3,50 €</div>
+      <div class="sidr">Sidrena cijena 3,50 €</div>
+      <div class="opis">Kava s mlijekom i svježi kroasan. Savršeno za jutro na terasi.</div>
+      <div id="kartica">
+        <svg viewBox="0 0 33 33" aria-label="QR kod za NOMAd karticu"><path d="M2,2H3V3H2zM3,2H4V3H3zM4,2H5V3H4zM5,2H6V3H5zM6,2H7V3H6zM7,2H8V3H7zM8,2H9V3H8zM14,2H15V3H14zM15,2H16V3H15zM18,2H19V3H18zM19,2H20V3H19zM20,2H21V3H20zM21,2H22V3H21zM24,2H25V3H24zM25,2H26V3H25zM26,2H27V3H26zM27,2H28V3H27zM28,2H29V3H28zM29,2H30V3H29zM30,2H31V3H30zM2,3H3V4H2zM8,3H9V4H8zM13,3H14V4H13zM15,3H16V4H15zM16,3H17V4H16zM17,3H18V4H17zM20,3H21V4H20zM24,3H25V4H24zM30,3H31V4H30zM2,4H3V5H2zM4,4H5V5H4zM5,4H6V5H5zM6,4H7V5H6zM8,4H9V5H8zM11,4H12V5H11zM12,4H13V5H12zM14,4H15V5H14zM15,4H16V5H15zM18,4H19V5H18zM19,4H20V5H19zM21,4H22V5H21zM22,4H23V5H22zM24,4H25V5H24zM26,4H27V5H26zM27,4H28V5H27zM28,4H29V5H28zM30,4H31V5H30zM2,5H3V6H2zM4,5H5V6H4zM5,5H6V6H5zM6,5H7V6H6zM8,5H9V6H8zM12,5H13V6H12zM15,5H16V6H15zM16,5H17V6H16zM17,5H18V6H17zM20,5H21V6H20zM24,5H25V6H24zM26,5H27V6H26zM27,5H28V6H27zM28,5H29V6H28zM30,5H31V6H30zM2,6H3V7H2zM4,6H5V7H4zM5,6H6V7H5zM6,6H7V7H6zM8,6H9V7H8zM12,6H13V7H12zM13,6H14V7H13zM15,6H16V7H15zM16,6H17V7H16zM18,6H19V7H18zM19,6H20V7H19zM20,6H21V7H20zM22,6H23V7H22zM24,6H25V7H24zM26,6H27V7H26zM27,6H28V7H27zM28,6H29V7H28zM30,6H31V7H30zM2,7H3V8H2zM8,7H9V8H8zM10,7H11V8H10zM12,7H13V8H12zM13,7H14V8H13zM14,7H15V8H14zM15,7H16V8H15zM16,7H17V8H16zM19,7H20V8H19zM20,7H21V8H20zM21,7H22V8H21zM24,7H25V8H24zM30,7H31V8H30zM2,8H3V9H2zM3,8H4V9H3zM4,8H5V9H4zM5,8H6V9H5zM6,8H7V9H6zM7,8H8V9H7zM8,8H9V9H8zM10,8H11V9H10zM12,8H13V9H12zM14,8H15V9H14zM16,8H17V9H16zM18,8H19V9H18zM20,8H21V9H20zM22,8H23V9H22zM24,8H25V9H24zM25,8H26V9H25zM26,8H27V9H26zM27,8H28V9H27zM28,8H29V9H28zM29,8H30V9H29zM30,8H31V9H30zM12,9H13V10H12zM16,9H17V10H16zM19,9H20V10H19zM2,10H3V11H2zM5,10H6V11H5zM7,10H8V11H7zM8,10H9V11H8zM10,10H11V11H10zM13,10H14V11H13zM14,10H15V11H14zM17,10H18V11H17zM18,10H19V11H18zM23,10H24V11H23zM25,10H26V11H25zM2,11H3V12H2zM3,11H4V12H3zM4,11H5V12H4zM5,11H6V12H5zM9,11H10V12H9zM10,11H11V12H10zM11,11H12V12H11zM13,11H14V12H13zM14,11H15V12H14zM16,11H17V12H16zM17,11H18V12H17zM19,11H20V12H19zM20,11H21V12H20zM22,11H23V12H22zM23,11H24V12H23zM24,11H25V12H24zM27,11H28V12H27zM30,11H31V12H30zM2,12H3V13H2zM5,12H6V13H5zM8,12H9V13H8zM10,12H11V13H10zM12,12H13V13H12zM14,12H15V13H14zM18,12H19V13H18zM19,12H20V13H19zM20,12H21V13H20zM21,12H22V13H21zM23,12H24V13H23zM25,12H26V13H25zM26,12H27V13H26zM27,12H28V13H27zM28,12H29V13H28zM29,12H30V13H29zM4,13H5V14H4zM5,13H6V14H5zM7,13H8V14H7zM9,13H10V14H9zM10,13H11V14H10zM11,13H12V14H11zM16,13H17V14H16zM17,13H18V14H17zM18,13H19V14H18zM22,13H23V14H22zM23,13H24V14H23zM28,13H29V14H28zM29,13H30V14H29zM5,14H6V15H5zM7,14H8V15H7zM8,14H9V15H8zM11,14H12V15H11zM13,14H14V15H13zM17,14H18V15H17zM18,14H19V15H18zM19,14H20V15H19zM22,14H23V15H22zM24,14H25V15H24zM27,14H28V15H27zM29,14H30V15H29zM30,14H31V15H30zM2,15H3V16H2zM3,15H4V16H3zM4,15H5V16H4zM5,15H6V16H5zM6,15H7V16H6zM10,15H11V16H10zM11,15H12V16H11zM13,15H14V16H13zM14,15H15V16H14zM19,15H20V16H19zM21,15H22V16H21zM22,15H23V16H22zM23,15H24V16H23zM2,16H3V17H2zM3,16H4V17H3zM5,16H6V17H5zM6,16H7V17H6zM8,16H9V17H8zM9,16H10V17H9zM12,16H13V17H12zM14,16H15V17H14zM19,16H20V17H19zM22,16H23V17H22zM23,16H24V17H23zM26,16H27V17H26zM27,16H28V17H27zM28,16H29V17H28zM29,16H30V17H29zM30,16H31V17H30zM3,17H4V18H3zM4,17H5V18H4zM5,17H6V18H5zM7,17H8V18H7zM10,17H11V18H10zM12,17H13V18H12zM13,17H14V18H13zM14,17H15V18H14zM15,17H16V18H15zM16,17H17V18H16zM18,17H19V18H18zM19,17H20V18H19zM20,17H21V18H20zM21,17H22V18H21zM26,17H27V18H26zM27,17H28V18H27zM29,17H30V18H29zM4,18H5V19H4zM5,18H6V19H5zM8,18H9V19H8zM10,18H11V19H10zM15,18H16V19H15zM16,18H17V19H16zM17,18H18V19H17zM19,18H20V19H19zM22,18H23V19H22zM23,18H24V19H23zM29,18H30V19H29zM4,19H5V20H4zM5,19H6V20H5zM7,19H8V20H7zM9,19H10V20H9zM10,19H11V20H10zM11,19H12V20H11zM14,19H15V20H14zM18,19H19V20H18zM19,19H20V20H19zM23,19H24V20H23zM24,19H25V20H24zM25,19H26V20H25zM27,19H28V20H27zM30,19H31V20H30zM2,20H3V21H2zM4,20H5V21H4zM5,20H6V21H5zM7,20H8V21H7zM8,20H9V21H8zM10,20H11V21H10zM11,20H12V21H11zM13,20H14V21H13zM14,20H15V21H14zM15,20H16V21H15zM19,20H20V21H19zM22,20H23V21H22zM25,20H26V21H25zM29,20H30V21H29zM30,20H31V21H30zM5,21H6V22H5zM6,21H7V22H6zM9,21H10V22H9zM10,21H11V22H10zM11,21H12V22H11zM12,21H13V22H12zM13,21H14V22H13zM14,21H15V22H14zM15,21H16V22H15zM18,21H19V22H18zM19,21H20V22H19zM22,21H23V22H22zM26,21H27V22H26zM29,21H30V22H29zM30,21H31V22H30zM2,22H3V23H2zM5,22H6V23H5zM7,22H8V23H7zM8,22H9V23H8zM14,22H15V23H14zM16,22H17V23H16zM18,22H19V23H18zM22,22H23V23H22zM23,22H24V23H23zM24,22H25V23H24zM25,22H26V23H25zM26,22H27V23H26zM28,22H29V23H28zM10,23H11V24H10zM11,23H12V24H11zM12,23H13V24H12zM14,23H15V24H14zM15,23H16V24H15zM18,23H19V24H18zM19,23H20V24H19zM22,23H23V24H22zM26,23H27V24H26zM28,23H29V24H28zM29,23H30V24H29zM30,23H31V24H30zM2,24H3V25H2zM3,24H4V25H3zM4,24H5V25H4zM5,24H6V25H5zM6,24H7V25H6zM7,24H8V25H7zM8,24H9V25H8zM13,24H14V25H13zM15,24H16V25H15zM16,24H17V25H16zM22,24H23V25H22zM24,24H25V25H24zM26,24H27V25H26zM29,24H30V25H29zM2,25H3V26H2zM8,25H9V26H8zM10,25H11V26H10zM12,25H13V26H12zM13,25H14V26H13zM15,25H16V26H15zM18,25H19V26H18zM22,25H23V26H22zM26,25H27V26H26zM27,25H28V26H27zM28,25H29V26H28zM29,25H30V26H29zM30,25H31V26H30zM2,26H3V27H2zM4,26H5V27H4zM5,26H6V27H5zM6,26H7V27H6zM8,26H9V27H8zM11,26H12V27H11zM13,26H14V27H13zM14,26H15V27H14zM16,26H17V27H16zM17,26H18V27H17zM18,26H19V27H18zM19,26H20V27H19zM22,26H23V27H22zM23,26H24V27H23zM24,26H25V27H24zM25,26H26V27H25zM26,26H27V27H26zM30,26H31V27H30zM2,27H3V28H2zM4,27H5V28H4zM5,27H6V28H5zM6,27H7V28H6zM8,27H9V28H8zM10,27H11V28H10zM12,27H13V28H12zM13,27H14V28H13zM16,27H17V28H16zM18,27H19V28H18zM19,27H20V28H19zM22,27H23V28H22zM24,27H25V28H24zM25,27H26V28H25zM26,27H27V28H26zM27,27H28V28H27zM28,27H29V28H28zM29,27H30V28H29zM2,28H3V29H2zM4,28H5V29H4zM5,28H6V29H5zM6,28H7V29H6zM8,28H9V29H8zM11,28H12V29H11zM12,28H13V29H12zM13,28H14V29H13zM15,28H16V29H15zM18,28H19V29H18zM19,28H20V29H19zM26,28H27V29H26zM27,28H28V29H27zM28,28H29V29H28zM30,28H31V29H30zM2,29H3V30H2zM8,29H9V30H8zM14,29H15V30H14zM15,29H16V30H15zM16,29H17V30H16zM19,29H20V30H19zM20,29H21V30H20zM22,29H23V30H22zM23,29H24V30H23zM25,29H26V30H25zM26,29H27V30H26zM29,29H30V30H29zM2,30H3V31H2zM3,30H4V31H3zM4,30H5V31H4zM5,30H6V31H5zM6,30H7V31H6zM7,30H8V31H7zM8,30H9V31H8zM10,30H11V31H10zM11,30H12V31H11zM12,30H13V31H12zM14,30H15V31H14zM18,30H19V31H18zM19,30H20V31H19zM22,30H23V31H22zM23,30H24V31H23zM25,30H26V31H25zM27,30H28V31H27zM29,30H30V31H29z" fill="#1F3D2B"/></svg>
+        <div><div class="nas">Uzmi račun – bez računa se ne računa!</div>
+        <div class="tekst">Skeniraj QR kod i besplatno napravi <b>NOMAd karticu</b>. Svaki skenirani račun donosi <b>+10 bodova</b>, a za <b>50 bodova</b> dobivaš veliku kavu s mlijekom i kroasan na račun kuće.</div></div>
+      </div>
+    </div>
+    <svg viewBox="0 0 960 1080" aria-hidden="true">
+      <circle cx="480" cy="560" r="330" fill="#FFFFFF" opacity=".55"/>
+      <g fill="none" stroke="#FF6B5A" stroke-width="8" stroke-linecap="round">
+        <path class="para" d="M400 300 c-30 40 30 60 0 100"/><path class="para" d="M460 280 c-30 40 30 60 0 100"/><path class="para" d="M520 300 c-30 40 30 60 0 100"/>
+      </g>
+      <ellipse cx="460" cy="700" rx="250" ry="44" fill="#4CC3E0" stroke="#1F3D2B" stroke-width="8"/>
+      <path d="M320 450 h280 l-24 190 a60 60 0 0 1-60 52 h-112 a60 60 0 0 1-60-52Z" fill="#E2456E" stroke="#1F3D2B" stroke-width="10"/>
+      <path d="M340 520 h240" stroke="#FFF6E4" stroke-width="12" opacity=".8"/>
+      <path d="M598 490 c80 0 80 110 -14 110" fill="none" stroke="#1F3D2B" stroke-width="10"/>
+      <ellipse cx="460" cy="452" rx="140" ry="22" fill="#8B5E3C" stroke="#1F3D2B" stroke-width="8"/>
+      <path d="M415 452 c25 -14 65 -14 90 0" stroke="#FFF6E4" stroke-width="7" fill="none"/>
+      <g transform="translate(570 640)" fill="#FFC93C" stroke="#1F3D2B" stroke-width="9" stroke-linejoin="round">
+        <ellipse cx="34" cy="92" rx="34" ry="22" transform="rotate(-50 34 92)"/>
+        <ellipse cx="276" cy="92" rx="34" ry="22" transform="rotate(50 276 92)"/>
+        <ellipse cx="84" cy="56" rx="48" ry="38" transform="rotate(-28 84 56)"/>
+        <ellipse cx="226" cy="56" rx="48" ry="38" transform="rotate(28 226 56)"/>
+        <ellipse cx="155" cy="40" rx="62" ry="48"/>
+      </g>
+    </svg>
+  </section>
+</div>
+
+<script>
+// ====== CJENIK (ažuriran 24.09.2026.) ======
+// [naziv, količina, trenutna cijena, sidrena cijena (ako se razlikuje), '*' = uvedeno 24.09.2026.]
+const MENI = [
+ ['Topli napici','','kava',[['Espresso kava','','1,80'],['Espresso bez kofeina','','2,00'],['Kava s mlijekom','mala','2,20'],['Kava s mlijekom','velika','2,40'],['Beskofeinska s mlijekom','velika','2,60'],['Kava s pjenom od šlaga','','2,50'],['Kava s vrhnjem','','2,20'],['Kapučino espresso','','2,50'],['Kava produžena','velika','1,90'],['Bijela kava','0,20 l','3,50'],['Kapučino instant','','4,00'],['Beskofeinska s vrhnjem','','2,50'],['Irska kava','','5,00'],['Affogato kava','','4,00','','*'],['Kakao','','3,50'],['Vruća čokolada','','4,00'],['Vruća čokolada sa šlagom','','4,50'],['Ledena kava','0,20 l','4,00'],['Ledeni kapučino','0,20 l','4,00'],['Kuhano vino','0,20 l','3,50']]],
+ ['Čajevi','','caj',[['Čaj','šalica','2,00'],['Čaj s limunom','šalica','3,00'],['Čaj s limunom i medom','šalica','3,50'],['Mlijeko','','1,00'],['Šlag','','1,00'],['Vrhnje za kavu','','1,00'],['Limun za čaj','kom','1,00'],['Med','kom','1,00']]],
+ ['Pecivo i kolači','','kolac',[['Kroasan punjeni','','1,70'],['Kroasan maxi','','1,50'],['Štrudla od višanja','','2,00'],['Torte razne','','4,50'],['Torta od sira','','3,80'],['Premium kolač','','4,00'],['Kolač Roshe, Pistacija','','5,00']]],
+ ['Paketi','Kava ide uz sve','paket',[['Kava + kroasan','','3,50'],['Cedevita + kava','','4,50'],['Cijeđeni sok 0,20 l + kava','','4,50']]],
+ ['Prirodni sokovi','Cijeđeno na šanku','sok',[['Cijeđena limunada','0,20 l','2,70'],['Sok od naranče, mali','0,10 l','2,50'],['Sok od naranče','0,20 l','3,50'],['Mix sok od voća','0,20 l','3,50']]],
+ ['Gazirana pića','','gazirano',[['Coca-Cola, Zero','0,25 l','3,50'],['Sprite','0,25 l','3,50'],['Schweppes razni','0,25 l','3,50'],['Narančada, limunada','0,29 l','3,50'],['Lemonish','0,33 l','4,00'],['Cedevita','0,20 l','3,50'],['Toco sokovi','0,25 l','3,50'],['Ledeni čaj','0,33 l','3,50'],['Jana vitamin','0,33 l','3,00'],['Kapronca sok','0,29 l','4,00'],['Red Bull','0,25 l','4,50'],['Hidra izotonik','0,50 l','4,00']]],
+ ['Vode','','voda',[['Jamnica gazirana','0,33 l','3,00'],['Jamnica gazirana','1,00 l','5,00'],['Mineralna Jamnica','0,10 l','1,00'],['Sensation okusi razni','0,25 l','3,50'],['Jana prirodna voda','0,33 l','3,50']]],
+ ['Pivo','','pivo',[['Ožujsko','0,33 l','3,50'],['Ožujsko','0,50 l','3,80'],['Ožujsko radler','0,50 l','3,50'],['Ožujsko bezalkoholno','0,50 l','3,50'],['Tomislav crno','0,50 l','4,00'],['Staropramen','0,33 l','3,80'],['Beck\'s','0,33 l','3,80'],['Stella Artois','0,33 l','3,80'],['Nikšićko','0,50 l','3,80'],['Vukovarsko','0,50 l','3,80'],['Madri','0,40 l','4,40','','*'],['Leffe','0,33 l','4,80'],['Grif craft','0,50 l','6,00'],['Aspall cyder','0,33 l','4,00']]],
+ ['Mješana pića','','koktel',[['Aperol Spritz','0,25 l','6,00'],['Campari Spritz','0,25 l','5,00'],['Limončelo Spritz','0,25 l','6,00'],['Campari Orange','0,20 l','6,00'],['Martini dry','0,15 l','6,00'],['Bambus','0,20 l','3,50'],['Gemišt','0,20 l','1,90'],['Škropec','0,10 l','1,60']]],
+ ['Vina na čašu','','vino',[['Vino bijelo stolno','0,10 l','2,00'],['Vino crveno stolno','0,10 l','2,50'],['Muškat žuti','0,10 l','4,00'],['Refošk slatki Simčić','0,10 l','4,00'],['Pjenušavo vino','0,10 l','5,00']]],
+ ['Vina u boci','','boca',[['Vino bijelo','1 l','15,00'],['Vino crveno','1 l','20,00'],['Pjenušavo vino','0,75 l','25,00'],['Muškat žuti','0,75 l','30,00'],['Rajnski rizling','0,75 l','35,00'],['Refošk slatki Simčić','0,75 l','35,00']]],
+ ['Domaće rakije','0,03 l','rakija',[['Lozovača','','3,50'],['Travarica','','3,50'],['Šljivovica','','3,50'],['Medena rakija','','3,50'],['Višnjevac, Orahovac','','3,50'],['Viljamovka','','4,50'],['Rakija Zlatna','0,04 l','4,70']]],
+ ['Likeri','0,03 l','liker',[['Amaro 18, Bacardi rum','','3,00'],['Rum domaći','','3,00'],['Pelinkovac','','3,50'],['Stock','','3,50'],['Vodka','','3,50'],['Cherry brandy','','3,50'],['Gin Tanqueray, Pink Gin','','4,00'],['Jägermeister','','4,00'],['Bajadera, Teranino','','4,00'],['Cynar','','4,00'],['Campari','','4,50'],['Tren (Aronija, Bacardi)','','4,50'],['Tren liker, bočica','0,05 l','8,00']]],
+ ['Viski i konjaci','0,03 l','viski',[['Famous Grouse','','4,50'],['Jack Daniel\'s','','5,00'],['Gentleman Jack','','5,00'],['Courvoisier','','7,00'],['Hennessy','','8,00'],['Martell','','8,00']]],
+ ['Sladoled','','sladoled',[['Snjeguljica, Rumenko','','2,90'],['Bananko','','3,00'],['Kornet, Kontiki','','3,50'],['Macho','','3,50'],['King, Plazma sladoled','','4,00']]],
+];
+const AKCENTI = ['#FFC93C','#FF6B5A','#4CC3E0','#E2456E','#4FD1A5'];
+const PO_STRANICI = 9, TRAJANJE = 11000, PONUDA_SVAKIH = 3, PONUDA_TRAJE = 15000;
+
+// ---- predmeti na stolu (dno predmeta je y=0) ----
+const S = 'stroke="#1F3D2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"';
+const para = `<g fill="none" stroke="#FF6B5A" stroke-width="5" stroke-linecap="round"><path class="para" d="M-20 -150 c-14 20 14 30 0 50"/><path class="para" d="M8 -160 c-14 20 14 30 0 50"/><path class="para" d="M36 -150 c-14 20 14 30 0 50"/></g>`;
+const mjeh = (x, y) => `<g fill="#FFFFFF" opacity=".9"><circle class="mjehur" cx="${x}" cy="${y}" r="5"/><circle class="mjehur" cx="${x+14}" cy="${y+10}" r="4"/><circle class="mjehur" cx="${x-10}" cy="${y+20}" r="3.5"/></g>`;
+const PREDMETI = {
+ kava: `<ellipse cx="0" cy="-8" rx="110" ry="16" fill="#4CC3E0" ${S}/><path d="M-70 -110 h140 l-12 80 a30 30 0 0 1-30 26 h-56 a30 30 0 0 1-30-26Z" fill="#E2456E" ${S}/><path d="M70 -96 c46 0 46 60 -8 60" fill="none" ${S}/><ellipse cx="0" cy="-110" rx="70" ry="12" fill="#8B5E3C" ${S}/>${para}
+   <g transform="translate(110 -14)"><ellipse cx="0" cy="0" rx="18" ry="11" fill="#FFC93C" ${S}/></g>`,
+ caj: `<path d="M-120 -10 a70 60 0 0 1 140 0Z" fill="#4FD1A5" ${S}/><path d="M-120 -40 c-40 -10 -50 -50 -40 -60" fill="none" ${S}/><path d="M20 -50 c30 0 40 -30 30 -40" fill="none" ${S}/><ellipse cx="-50" cy="-72" rx="16" ry="8" fill="#FFC93C" ${S}/>
+   <ellipse cx="80" cy="-6" rx="60" ry="10" fill="#FFF6E4" ${S}/><path d="M42 -70 h76 l-8 52 a18 18 0 0 1-18 14 h-24 a18 18 0 0 1-18-14Z" fill="#FFF6E4" ${S}/><ellipse cx="80" cy="-70" rx="38" ry="7" fill="#C97B2C" ${S}/><circle cx="110" cy="-78" r="14" fill="#FFC93C" ${S}/>`,
+ kolac: `<g transform="translate(-70 0)"><path d="M-70 -60 h140" ${S}/><path d="M0 -60 v52 M-30 -6 h60" ${S} fill="none"/><path d="M-56 -60 v-50 q56 -26 112 0 v50Z" fill="#FFB3C7" ${S}/><path d="M-56 -96 q14 14 28 0 q14 14 28 0 q14 14 28 0 q14 14 28 0" fill="none" stroke="#FFF6E4" stroke-width="7"/><circle cx="0" cy="-130" r="12" fill="#E2456E" ${S}/></g>`+`<g transform="translate(70 0)">`+`<ellipse cx="-50" cy="-8" rx="90" ry="14" fill="#FFFFFF" ${S}/><path d="M-120 -20 L-10 -20 L-10 -90 L-120 -60Z" fill="#FFE38A" ${S}/><path d="M-120 -60 L-10 -90 L-10 -110 L-120 -78Z" fill="#E2456E" ${S}/><circle cx="-40" cy="-118" r="12" fill="#FF6B5A" ${S}/>
+   <g transform="translate(40 -40) scale(.42)" fill="#FFC93C" ${S}><ellipse cx="34" cy="92" rx="34" ry="22" transform="rotate(-50 34 92)"/><ellipse cx="276" cy="92" rx="34" ry="22" transform="rotate(50 276 92)"/><ellipse cx="84" cy="56" rx="48" ry="38" transform="rotate(-28 84 56)"/><ellipse cx="226" cy="56" rx="48" ry="38" transform="rotate(28 226 56)"/><ellipse cx="155" cy="40" rx="62" ry="48"/></g></g>`,
+ paket: `<ellipse cx="-60" cy="-6" rx="70" ry="12" fill="#4CC3E0" ${S}/><path d="M-110 -90 h100 l-10 64 a22 22 0 0 1-22 20 h-36 a22 22 0 0 1-22-20Z" fill="#E2456E" ${S}/><ellipse cx="-60" cy="-90" rx="50" ry="9" fill="#8B5E3C" ${S}/>
+   <g transform="translate(20 -40) scale(.42)" fill="#FFC93C" ${S}><ellipse cx="34" cy="92" rx="34" ry="22" transform="rotate(-50 34 92)"/><ellipse cx="276" cy="92" rx="34" ry="22" transform="rotate(50 276 92)"/><ellipse cx="84" cy="56" rx="48" ry="38" transform="rotate(-28 84 56)"/><ellipse cx="226" cy="56" rx="48" ry="38" transform="rotate(28 226 56)"/><ellipse cx="155" cy="40" rx="62" ry="48"/></g>`,
+ sok: `<path d="M-50 -170 h100 l-12 164 h-76Z" fill="#FF9F1C" ${S}/><path d="M-46 -150 h92" ${S} fill="none"/><path d="M10 -150 L40 -230 L56 -230" fill="none" stroke="#E2456E" stroke-width="9" stroke-linecap="round"/><circle cx="-56" cy="-170" r="30" fill="#FFC93C" ${S}/><path d="M-56 -200 v60 M-86 -170 h60" stroke="#FF9F1C" stroke-width="4"/>
+   <circle cx="90" cy="-26" r="26" fill="#FF9F1C" ${S}/><circle cx="130" cy="-22" r="22" fill="#FFC93C" ${S}/>`,
+ gazirano: `<path d="M-90 -6 v-150 q0 -30 16 -46 v-30 h28 v30 q16 16 16 46 v150Z" fill="#E2456E" ${S}/><rect x="-90" y="-120" width="60" height="40" fill="#FFF6E4" ${S}/><path d="M20 -130 h90 l-10 124 h-70Z" fill="#9FE3F2" ${S}/><path d="M24 -100 h82 l-7 94 h-68Z" fill="#7A3B1E"/>${mjeh(60,-30)}<rect x="40" y="-120" width="22" height="22" rx="4" fill="#FFFFFF" opacity=".8"/>`,
+ voda: `<path d="M-80 -6 v-160 q0 -24 14 -36 v-24 h28 v24 q14 12 14 36 v160Z" fill="#9FE3F2" ${S}/><rect x="-80" y="-130" width="56" height="44" fill="#4CC3E0" ${S}/><path d="M20 -120 h90 l-10 114 h-70Z" fill="#DFF6FB" ${S}/>${mjeh(64,-30)}<circle cx="96" cy="-112" r="18" fill="#4FD1A5" ${S}/>`,
+ pivo: `<path d="M-70 -180 h120 v170 a10 10 0 0 1-10 10 h-100 a10 10 0 0 1-10-10Z" fill="#FFC93C" ${S}/><path d="M50 -150 h30 a20 20 0 0 1 20 20 v70 a20 20 0 0 1-20 20 h-30" fill="none" stroke="#1F3D2B" stroke-width="10"/><path d="M-80 -176 q10 -30 40 -24 q20 -26 50 -8 q30 -14 46 14 q14 6 4 22Z" fill="#FFFFFF" ${S}/><path d="M-40 -140 v110 M0 -140 v110" stroke="#FF9F1C" stroke-width="6" opacity=".6"/>${mjeh(-20,-40)}`,
+ koktel: `<path d="M-60 -200 a60 70 0 0 0 120 0Z" fill="#FF6B5A" ${S}/><path d="M0 -130 v110 M-44 -6 h88" ${S} fill="none"/><circle cx="54" cy="-206" r="26" fill="#FF9F1C" ${S}/><path d="M54 -232 v52 M28 -206 h52" stroke="#FFC93C" stroke-width="4"/><path d="M-20 -200 L-50 -270" stroke="#4FD1A5" stroke-width="8" stroke-linecap="round"/>${mjeh(0,-160)}`,
+ vino: `<path d="M-90 -190 a46 60 0 0 0 92 0Z" fill="#B3264A" ${S}/><path d="M-44 -132 v120 M-80 -8 h72" ${S} fill="none"/><path d="M20 -190 a46 60 0 0 0 92 0Z" fill="#FFE38A" ${S}/><path d="M66 -132 v120 M30 -8 h72" ${S} fill="none"/><circle cx="10" cy="-30" r="16" fill="#7B3FA0" ${S}/><circle cx="-6" cy="-14" r="14" fill="#7B3FA0" ${S}/><circle cx="26" cy="-12" r="14" fill="#7B3FA0" ${S}/>`,
+ boca: `<path d="M-40 -6 v-150 q0 -30 20 -44 v-70 h40 v70 q20 14 20 44 v150Z" fill="#2C7A4B" ${S}/><rect x="-40" y="-130" width="80" height="60" fill="#FFF6E4" ${S}/><rect x="-20" y="-272" width="40" height="22" fill="#B3264A" ${S}/><path d="M70 -180 a40 52 0 0 0 80 0Z" fill="#B3264A" ${S}/><path d="M110 -128 v118 M78 -8 h64" ${S} fill="none"/>`,
+ rakija: `<path d="M-110 -6 v-120 q0 -26 18 -38 v-40 h30 v40 q18 12 18 38 v120Z" fill="#DFF6FB" ${S}/><rect x="-110" y="-100" width="66" height="44" fill="#FFC93C" ${S}/><path d="M-6 -80 h56 l-6 74 h-44Z" fill="#FFF6E4" ${S}/><path d="M-3 -60 h50 l-4 54 h-42Z" fill="#FFE38A"/><path d="M70 -80 h56 l-6 74 h-44Z" fill="#FFF6E4" ${S}/><path d="M73 -60 h50 l-4 54 h-42Z" fill="#E2456E" opacity=".8"/>`,
+ viski: `<path d="M-80 -120 h160 l-12 114 h-136Z" fill="#DFF6FB" ${S}/><path d="M-76 -80 h152 l-8 74 h-136Z" fill="#E59A2E"/><rect x="-40" y="-100" width="40" height="40" rx="8" fill="#FFFFFF" opacity=".85" ${S}/><rect x="10" y="-92" width="36" height="36" rx="8" fill="#FFFFFF" opacity=".85" ${S}/><path d="M-80 -120 h160 l-12 114 h-136Z" fill="none" ${S}/>`,
+ liker: `<path d="M-110 -6 v-100 a40 40 0 0 1 24 -36 v-60 h32 v60 a40 40 0 0 1 24 36 v100Z" fill="#7B3FA0" ${S}/><rect x="-110" y="-96" width="80" height="40" fill="#FFC93C" ${S}/><rect x="-90" y="-216" width="40" height="18" fill="#E2456E" ${S}/><path d="M10 -110 h70 l-35 50Z" fill="#E2456E" ${S}/><path d="M45 -60 v52 M20 -8 h50" ${S} fill="none"/><path d="M100 -90 h60 l-30 42Z" fill="#4FD1A5" ${S}/><path d="M130 -48 v40 M110 -8 h40" ${S} fill="none"/>`,
+ sladoled: `<path d="M-40 -110 L0 0 L40 -110Z" fill="#E5A65A" ${S}/><path d="M-30 -90 L20 -40 M-10 -110 L30 -70 M30 -100 L-14 -50" stroke="#B5762F" stroke-width="4"/><circle cx="-18" cy="-128" r="34" fill="#FFB3C7" ${S}/><circle cx="20" cy="-130" r="32" fill="#4FD1A5" ${S}/><circle cx="0" cy="-168" r="32" fill="#FFF6E4" ${S}/><circle cx="4" cy="-206" r="10" fill="#E2456E" ${S}/>`,
+};
+
+
+const TEME = {
+ kava:{n:['#7FD0E8','#BDE8F0','#FFF4D6'],b1:'#8FD16A',b2:'#3FAE5C',d:['#1F7A43','#E2456E','#FF9F1C'],p:['#FF6B5A','#FFF6E4'],s:['#E2456E','#2BA3C4'],sto:'#FFFFFF',voce:'#FF6B5A',x:['sunce','oblaci','ptice']},
+ caj:{n:['#F6B26B','#FBD9A8','#FFF1DA'],b1:'#C9B458',b2:'#B5762F',d:['#FF9F1C','#E2456E','#C9653E'],p:['#4FD1A5','#FFF6E4'],s:['#FF9F1C','#4FD1A5'],sto:'#FFF6E4',voce:'#FF6B5A',x:['sunce','oblaci','lisce']},
+ kolac:{n:['#FFB3C7','#FFE0EA','#FFF6E4'],b1:'#A7E08A',b2:'#4FD1A5',d:['#E2456E','#FFB3C7','#FFC93C'],p:['#E2456E','#FFF6E4'],s:['#FFB3C7','#4CC3E0'],sto:'#FFE0EA',voce:'#FFFFFF',x:['sunce','oblaci','cvijece','vocke']},
+ paket:{n:['#7FD0E8','#BDE8F0','#FFF4D6'],b1:'#8FD16A',b2:'#3FAE5C',d:['#FF9F1C','#1F7A43','#E2456E'],p:['#FFC93C','#FFF6E4'],s:['#E2456E','#4FD1A5'],sto:'#FFFFFF',voce:'#FF6B5A',x:['sunce','oblaci','balon']},
+ sok:{n:['#5CC8F0','#B8EBFA','#FFF8D0'],b1:'#9BDB5C',b2:'#3FAE5C',d:['#1F7A43','#2C8A4B','#1F7A43'],p:['#FF9F1C','#FFF6E4'],s:['#FFC93C','#FF6B5A'],sto:'#FFF1C2',voce:'#FF9F1C',x:['sunce','oblaci','vocke']},
+ gazirano:{n:['#4CC3E0','#A8E6F5','#FFF4D6'],b1:'#8FD16A',b2:'#2C8A4B',d:['#E2456E','#FFC93C','#4CC3E0'],p:['#E2456E','#FFF6E4'],s:['#FF6B5A','#4CC3E0'],sto:'#FFFFFF',voce:'#FFFFFF',x:['sunce','oblaci','zastavice']},
+ voda:{n:['#6FD3F5','#C7F0FB','#EFFFFB'],b1:'#A7E08A',b2:'#4FD1A5',d:['#2C8A4B','#4CC3E0','#1F7A43'],p:['#4CC3E0','#FFFFFF'],s:['#4CC3E0','#4FD1A5'],sto:'#E6FAFD',voce:'#FFFFFF',x:['sunce','oblaci','ribnjak','ptice']},
+ pivo:{n:['#FF9F1C','#FFD27A','#FFF1D0'],b1:'#B9D45A','b2':'#5C9A3A',d:['#1F7A43','#FF6B5A','#FFC93C'],p:['#1F7A43','#FFF6E4'],s:['#FFC93C','#2BA3C4'],sto:'#FFF6E4',voce:'#FFC93C',x:['sunce','zastavice']},
+ koktel:{n:['#FF6B8A','#FFAA80','#FFE2B8'],b1:'#7FC46A',b2:'#2C8A4B',d:['#FF6B5A','#FFC93C','#E2456E'],p:['#FF9F1C','#FFF6E4'],s:['#4FD1A5','#E2456E'],sto:'#FFF6E4',voce:'#FF9F1C',x:['sunce','lampice']},
+ vino:{n:['#F7A072','#FFD6A5','#FFF1DA'],b1:'#9BC46A',b2:'#5C8A3A',d:['#1F7A43','#7B3FA0','#2C8A4B'],p:['#B3264A','#FFF6E4'],s:['#7B3FA0','#FFC93C'],sto:'#FFF6E4',voce:'#7B3FA0',x:['sunce','oblaci','vinograd']},
+ boca:{n:['#E8705A','#F7B27A','#FFE2B8'],b1:'#8FB85A',b2:'#4F7A35',d:['#7B3FA0','#1F7A43','#B3264A'],p:['#7B3FA0','#FFF6E4'],s:['#B3264A','#FFC93C'],sto:'#FFF1DA',voce:'#7B3FA0',x:['sunce','vinograd','ptice']},
+ rakija:{n:['#9AD0EC','#D7EEF7','#FFF6E4'],b1:'#A7C86A',b2:'#5C8A3A',d:['#7B3FA0','#1F7A43','#7B3FA0'],p:['#2C5239','#FFF6E4'],s:['#C9653E','#2C8A4B'],sto:'#FFF6E4',voce:'#4B2A7B',x:['sunce','oblaci','vocke']},
+ liker:{n:['#3B2A6B','#7B4FA0','#E29AB5'],b1:'#3F7A4C',b2:'#1F5A35',d:['#E2456E','#4FD1A5','#FFC93C'],p:['#7B3FA0','#FFE38A'],s:['#E2456E','#4FD1A5'],sto:'#FFF6E4',voce:'#FFC93C',x:['zvijezde','lampice']},
+ viski:{n:['#121D3A','#2A3A6B','#5A6FA0'],b1:'#2C5A3C',b2:'#173A25',d:['#1F5A35','#2C7A4B','#1F5A35'],p:['#B3264A','#FFE38A'],s:['#C97B2C','#4CC3E0'],sto:'#FFF6E4',voce:'#FFC93C',x:['zvijezde','lampice']},
+ sladoled:{n:['#4CC3E0','#B8F0FF','#FFF8E8'],b1:'#A7E08A',b2:'#4FD1A5',d:['#FFB3C7','#4FD1A5','#FFC93C'],p:['#FFB3C7','#FFFFFF'],s:['#4FD1A5','#FFB3C7'],sto:'#FFF0F5',voce:'#E2456E',x:['sunce','oblaci','balon','cvijece']},
+};
+const TAMNO = ['liker','viski'];
+function postaviTemu(ik){
+  const t = TEME[ik] || TEME.kava, st = document.documentElement.style;
+  [['--n1',t.n[0]],['--n2',t.n[1]],['--n3',t.n[2]],['--b1',t.b1],['--b2',t.b2],['--d1',t.d[0]],['--d2',t.d[1]],['--d3',t.d[2]],['--p1',t.p[0]],['--p2',t.p[1]],['--s1',t.s[0]],['--s2',t.s[1]],['--sto',t.sto],['--voce',t.voce]].forEach(([k,v])=>st.setProperty(k,v));
+  document.querySelectorAll('#land .x').forEach(g => g.classList.toggle('on', t.x.some(x => g.classList.contains('x-'+x))));
+  document.getElementById('brand').style.color = TAMNO.includes(ik) ? '#FFF6E4' : '#1F3D2B';
+}
+
+const ALKO = ['Pivo','Mješana pića','Vina na čašu','Vina u boci','Domaće rakije','Likeri','Viski i konjaci'];
+const ALKO_ART = ['Irska kava','Kuhano vino'];
+const ekrani = [];
+for (const [kat, nap, ikona, st] of MENI) {
+  const n = Math.ceil(st.length / PO_STRANICI);
+  for (let i = 0; i < n; i++) ekrani.push({ kat, nap, ikona, st: st.slice(Math.round(i * st.length / n), Math.round((i + 1) * st.length / n)), dio: n > 1 ? (i + 1) + '/' + n : '' });
+}
+const $ = s => document.querySelector(s);
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let k = 0, odPonude = 0, timeri = [], zadnjaIkona = '';
+const traka = $('#traka i'), predmet = $('#predmet');
+
+function traka0(ms){ traka.style.transition='none'; traka.style.width='0'; void traka.offsetWidth; traka.style.transition=`width ${ms}ms linear`; traka.style.width='100%'; }
+function postaviPredmet(ikona){
+  if (ikona === zadnjaIkona) return; zadnjaIkona = ikona; postaviTemu(ikona);
+  predmet.classList.add('skriven');
+  timeri.push(setTimeout(() => { predmet.innerHTML = PREDMETI[ikona] || ''; predmet.classList.remove('skriven'); }, 450));
+}
+function prikaziEkran() {
+  const e = ekrani[k % ekrani.length], boja = AKCENTI[k % AKCENTI.length]; k++;
+  document.documentElement.style.setProperty('--akcent', boja);
+  $('#kat').textContent = e.kat;
+  $('#napomena').textContent = [e.nap, e.dio].filter(Boolean).join('  ·  ');
+  let zvjezdica = false;
+  $('#lista').innerHTML = e.st.map(([n, kol, c, sid, z]) => { if (z) zvjezdica = true;
+    return `<li><span class="naz">${esc(n)}${kol ? `<span class="kol">${esc(kol)}</span>` : ''}</span><span class="tocke"></span><span class="sid">${sid || c} €${z ? '*' : ''}</span><span class="cij">${c} €</span></li>`; }).join('');
+  $('#zvj').textContent = zvjezdica ? '* U ponudi od 24.09.2026.; sidrena je cijena pri uvođenju.' : '';
+  $('#alko').classList.toggle('on', ALKO.includes(e.kat) || e.st.some(a => ALKO_ART.includes(a[0])));
+  postaviPredmet(e.ikona);
+  [...document.querySelectorAll('#lista li')].forEach((li, i) => timeri.push(setTimeout(() => li.classList.add('vid'), 150 + i * 110)));
+  traka0(TRAJANJE);
+  return TRAJANJE;
+}
+function korak() {
+  timeri.forEach(clearTimeout); timeri = [];
+  predmet.classList.remove('skriven');
+  let ms;
+  if (odPonude >= PONUDA_SVAKIH) { $('#ponuda').classList.add('vid'); odPonude = 0; ms = PONUDA_TRAJE; }
+  else { $('#ponuda').classList.remove('vid'); ms = prikaziEkran(); odPonude++; }
+  setTimeout(korak, ms);
+}
+function skala(){ const s = Math.min(innerWidth / 1920, innerHeight / 1080); $('#stage').style.transform = `translate(-50%,-50%) scale(${s})`; }
+addEventListener('resize', skala); skala(); postaviTemu('kava');
+korak();
+setTimeout(() => location.reload(), 6 * 3600e3);
+</script>
+</body>
+</html>
