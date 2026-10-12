@@ -157,8 +157,6 @@ const app = express();
 app.set('trust proxy', 1);
 const smallJson = express.json({ limit: '10kb' });
 app.use((req, res, next) => (req.path === '/api/scan' || req.path.startsWith('/inventura') || req.path.startsWith('/agent') ? next() : smallJson(req, res, next)));
-// ---------- Agent NOMAd (AI chat za web nomadinfo.space) ----------
-require('./agent/agent').mount(app);
 // ---------- Inventura (zasebna baza data/inventura.db) ----------
 const inventura = require('./inventura/routes').createInventura({
   dbFile: process.env.INVENTURA_DB_FILE || path.join(path.dirname(CFG.dbFile), 'inventura.db'),
@@ -166,6 +164,8 @@ const inventura = require('./inventura/routes').createInventura({
   adminPin: CFG.adminPin,
 });
 app.use('/inventura', inventura.router);
+// ---------- Agent NOMAd (AI chat za web nomadinfo.space) – čita i normative iz inventure ----------
+require('./agent/agent').mount(app, { inventuraDb: inventura.db });
 app.get(['/i', '/I'], (req, res) => res.redirect(302, '/inventura/')); // kratki link za mobitel
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 app.use('/vendor/html5-qrcode.min.js', (req, res) =>

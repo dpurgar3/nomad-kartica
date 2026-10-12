@@ -31,6 +31,52 @@ function loadCjenik() {
   } catch (e) { console.error('agent: cjenik', e.message); return ''; }
 }
 
+// ---------- Normativi (sastav pića i jela) iz aplikacije Inventura ----------
+function cistiNaziv(n) {
+  return String(n || '')
+    .replace(/\bzadu[žz]n\w*\b/gi, '')
+    .replace(/\s+\d+\/\d+\s*l\.?/gi, '')
+    .replace(/\s+(kg|lit|l\.|ml\.|kom)\s*$/i, '')
+    .replace(/\s{2,}/g, ' ').trim();
+}
+function kolicina(q, unit) {
+  const n = Number(q);
+  if (!Number.isFinite(n)) return '';
+  const r = x => String(x >= 1 ? Math.round(x * 10) / 10 : Number(x.toPrecision(2))).replace('.', ',');
+  if (unit === 'kg') return r(n * 1000) + ' g';
+  if (unit === 'l') return r(n * 1000) + ' ml';
+  if (unit === 'dl') return r(n * 100) + ' ml';
+  if (unit === 'porcija') return r(n) + ' porcija';
+  return r(n) + ' ' + unit;
+}
+let norm = { at: 0, text: '' };
+function loadNormativi(db) {
+  if (Date.now() - norm.at < 10 * 60e3 && norm.text) return norm.text;
+  let list = [];
+  try {
+    if (db) {
+      const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Zagreb' }).format(new Date());
+      const recs = db.prepare('SELECT id, name FROM recipes WHERE active=1 ORDER BY name').all();
+      const ver = db.prepare('SELECT id FROM recipe_versions WHERE recipe_id=? AND valid_from<=? ORDER BY valid_from DESC, version DESC LIMIT 1');
+      const lines = db.prepare(`SELECT l.qty_e4, a.name AS a_name, a.unit AS a_unit, r.name AS r_name FROM recipe_lines l
+        LEFT JOIN articles a ON a.id=l.article_id LEFT JOIN recipes r ON r.id=l.sub_recipe_id WHERE l.version_id=? ORDER BY l.id`);
+      for (const r of recs) {
+        const v = ver.get(r.id, today); if (!v) continue;
+        list.push({ naziv: r.name, sastojci: lines.all(v.id).map(x => x.a_name
+          ? { naziv: x.a_name, kolicina: x.qty_e4 / 1e4, jedinica: x.a_unit }
+          : { naziv: x.r_name, kolicina: x.qty_e4 / 1e4, jedinica: 'porcija' }) });
+      }
+    }
+  } catch (e) { console.error('agent: normativi iz baze', e.message); list = []; }
+  if (!list.length) {
+    try { list = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'inventura', 'seed', 'normativi-remaris.json'), 'utf8')).normativi || []; }
+    catch (e) { console.error('agent: normativi seed', e.message); }
+  }
+  norm = { at: Date.now(), text: list.filter(n => !/\(STARI\)/i.test(n.naziv) && (n.sastojci || []).length)
+    .map(n => `${n.naziv}: ` + n.sastojci.filter(x => Number(x.kolicina) > 0).map(x => `${cistiNaziv(x.naziv)} ${kolicina(x.kolicina, x.jedinica)}`.trim()).join(', ')).join('\n') };
+  return norm.text;
+}
+
 // ---------- Vrijeme (Open-Meteo, Novi Marof) ----------
 const WMO = { 0: 'vedro', 1: 'pretežno vedro', 2: 'djelomično oblačno', 3: 'oblačno', 45: 'magla', 48: 'magla s injem',
   51: 'slaba rosulja', 53: 'rosulja', 55: 'jaka rosulja', 61: 'slaba kiša', 63: 'kiša', 65: 'jaka kiša', 66: 'ledena kiša',
@@ -75,7 +121,7 @@ function danas() {
   return { text: f.format(new Date()), iso };
 }
 
-function sustav({ podaci, cjenik, prognoza, objave }) {
+function sustav({ podaci, cjenik, prognoza, objave, normativi = '' }) {
   const d = danas();
   return `Ti si Agent NOMAd, veseli kauboj-domaćin NOMAd Caffe Bara u Novom Marofu. Odgovaraš gostima na web stranici.
 Danas je ${d.text} (${d.iso}).
@@ -88,6 +134,8 @@ PRAVILA
 - Alkohol ne nudi maloljetnicima.
 - Prognozu daj samo iz podataka o vremenu, za Novi Marof.
 - NOVOSTI S FACEBOOKA su naše objave (najnovije prve): koristi ih za akcije, događanja i promjene radnog vremena. Ako objava za neki datum mijenja redovno stanje, za taj datum vrijedi objava. Ne najavljuj događanja koja su prošla. Smiješ dati link objave. Ako nema ničeg aktualnog, reci to i uputi na ${podaci.facebook || 'naš Facebook'}.
+- SASTAV (normativi): kad gost pita od čega se nešto sastoji ili što je unutra, odgovori iz popisa SASTAV PIĆA I JELA. Naziv u popisu može biti malo drugačiji od cjenika (npr. "MALA KAVA S MLIJEKOM" = "Kava s mlijekom mala") – poveži ih razumno. Sastojke navedi prirodnim jezikom (npr. "espresso od 8 g kave i 50 ml mlijeka"). Ne spominji interne šifre ni skladišne oznake. Ako artikla nema u popisu, reci da sastav nemaš i uputi na osoblje.
+- Za alergene i posebne prehrane nemaš potpune podatke: navedi sastojke koje znaš i obavezno savjetuj da gost provjeri s osobljem.
 - Ne odgovaraj na teme koje nemaju veze s kafićem, Novim Marofom ili posjetom; ljubazno vrati razgovor na NOMAd.
 
 PODACI O KAFIĆU
@@ -98,6 +146,9 @@ ${cjenik || 'Cjenik trenutno nije dostupan – uputi na QR cjenik u kafiću.'}
 
 VRIJEME (Novi Marof)
 ${prognoza || 'Prognoza trenutno nije dostupna.'}
+
+SASTAV PIĆA I JELA (normativi, količine za jednu porciju)
+${normativi || 'Normativi trenutno nisu dostupni.'}
 
 NOVOSTI S FACEBOOKA
 ${objave.length ? objave.map(o => `[${o.datum}] ${o.tekst} (${o.link})`).join('\n\n') : 'Nema učitanih objava.'}`;
@@ -140,7 +191,7 @@ function cleanMessages(list) {
   return out;
 }
 
-function mount(app, { fetchImpl = globalThis.fetch } = {}) {
+function mount(app, { fetchImpl = globalThis.fetch, inventuraDb = null } = {}) {
   const widget = path.join(__dirname, 'widget.js');
   app.get('/agent-nomad.js', (req, res) => {
     res.set('Cache-Control', 'public, max-age=600');
@@ -163,7 +214,7 @@ function mount(app, { fetchImpl = globalThis.fetch } = {}) {
     if (!key) return res.status(503).json({ error: 'Agent se upravo sedla. Za sva pitanja nazovi +385 91 934 5741.' });
     try {
       const [prognoza, objave] = await Promise.all([vrijeme(fetchImpl), fbObjave(fetchImpl)]);
-      const system = sustav({ podaci: loadPodaci(), cjenik: loadCjenik(), prognoza, objave });
+      const system = sustav({ podaci: loadPodaci(), cjenik: loadCjenik(), prognoza, objave, normativi: loadNormativi(inventuraDb) });
       const r = await fetchImpl(API_URL, {
         method: 'POST', signal: AbortSignal.timeout(30000),
         headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
@@ -179,4 +230,4 @@ function mount(app, { fetchImpl = globalThis.fetch } = {}) {
   });
 }
 
-module.exports = { mount, loadCjenik, cleanMessages, sustav, loadPodaci };
+module.exports = { mount, loadCjenik, cleanMessages, sustav, loadPodaci, loadNormativi };
