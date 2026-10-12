@@ -1,0 +1,28 @@
+{
+  "_upute": "Ovdje upiši stalne podatke koje Agent NOMAd zna. Cijene se same čitaju iz public/meni.html (TV meni). Akcije i događanja objavi na Facebooku.",
+  "naziv": "NOMAd Caffe Bar",
+  "obrt": "Ugostiteljski obrt Artist",
+  "adresa": "Ulica Antuna Mihanovića 3, 42220 Novi Marof (Kulturni centar Ivan Rabuzin)",
+  "telefon": "+385 91 934 5741",
+  "email": "artistdrazen@gmail.com",
+  "web": "https://nomadinfo.space",
+  "facebook": "https://facebook.com/nomadcaffebar",
+  "instagram": "https://instagram.com/nomad.caffebar.novimarof",
+  "radno_vrijeme": "Zatvaramo u 22:00. Za točno vrijeme otvaranja i praznike neka gost nazove ili pogleda Facebook.",
+  "pogodnosti": [
+    "Potpuno nepušački prostor",
+    "Prostrana terasa u zoni bez prometa, park odmah ispod kafića",
+    "Kutić za djecu sa slikovnicama i igračkama, prostor za presvlačenje beba",
+    "Rampe i toalet prilagođen osobama s invaliditetom",
+    "Besplatni Wi-Fi za goste (lozinku daje osoblje)",
+    "Digitalni cjenik preko QR koda"
+  ],
+  "kartica_vjernosti": "Od 15.10.2026. svaki skenirani NOMAd račun donosi +10 bodova. Za 50 bodova gost dobiva veliku kavu s mlijekom i kroasan na račun kuće. Kartica se radi besplatno na https://nomad-kartica.onrender.com",
+  "ponuda_dana": "Kava + kroasan za 3,50 €",
+  "rezervacije": "Rezervacije, proslave i veće narudžbe samo telefonom: +385 91 934 5741",
+  "cesta_pitanja": [
+    { "p": "Mogu li doći s djecom?", "o": "Da, imamo kutić za djecu i prostor za presvlačenje beba." },
+    { "p": "Smije li se pušiti?", "o": "Ne, NOMAd je potpuno nepušački, i unutra i na terasi." },
+    { "p": "Poslužujete li alkohol maloljetnicima?", "o": "Ne, alkohol ne poslužujemo osobama mlađim od 18 godina." }
+  ]
+}
