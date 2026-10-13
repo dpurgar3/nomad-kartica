@@ -33,6 +33,18 @@
 
   <section id="aMain" class="hidden" style="display:flex;flex-direction:column;gap:14px">
     <div class="small" id="who"></div>
+    <div class="box hidden" id="obavijesti">
+      <div class="label">Obavijesti za web (Agent NOMAd)</div>
+      <div class="small">Što ovdje upišeš, Agent NOMAd na nomadinfo.space odmah zna i govori gostima: akcije, događanja, promjene radnog vremena.</div>
+      <form id="fObav" style="display:flex;flex-direction:column;gap:10px">
+        <div class="field"><label for="obTekst">Obavijest</label><textarea id="obTekst" rows="4" maxlength="1000" required placeholder="npr. Subota 18.10. – live svirka od 20 h, ulaz slobodan" style="background:#000;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:12px;font:inherit;font-size:16px;resize:vertical"></textarea></div>
+        <div class="field"><label for="obDo">Vrijedi do (prazno = dok ne obrišeš)</label><input id="obDo" type="date"></div>
+        <button class="btn" type="submit">Objavi agentu</button>
+      </form>
+      <div class="ok" id="obOk" role="status"></div><div class="err" id="obErr" role="alert"></div>
+      <div id="obList" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
     <div class="box">
       <div class="label">Potvrdi nagradu</div>
       <div id="reader" class="hidden" style="border-radius:14px;overflow:hidden"></div>

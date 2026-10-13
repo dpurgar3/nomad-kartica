@@ -40,6 +40,13 @@ if ((!CFG.adminPin || CFG.adminPin.length < 4) && !CFG.staff.length) {
 fs.mkdirSync(path.dirname(CFG.dbFile), { recursive: true });
 const db = new Database(CFG.dbFile);
 db.pragma('journal_mode = WAL');
+db.exec(`CREATE TABLE IF NOT EXISTS obavijesti (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tekst TEXT NOT NULL,
+  vrijedi_do TEXT,
+  autor TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
+)`);
 db.exec(`
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -174,8 +181,9 @@ const inventura = require('./inventura/routes').createInventura({
 });
 app.use('/inventura', inventura.router);
 // ---------- Agent NOMAd (AI chat za web nomadinfo.space) – čita i normative iz inventure ----------
-require('./agent/agent').mount(app, { inventuraDb: inventura.db });
+require('./agent/agent').mount(app, { inventuraDb: inventura.db, obavijesti: aktivneObavijesti });
 app.get(['/i', '/I'], (req, res) => res.redirect(302, '/inventura/')); // kratki link za mobitel
+app.get(['/o', '/O'], (req, res) => res.redirect(302, '/osoblje#obavijesti')); // obavijesti za web
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 app.use('/vendor/html5-qrcode.min.js', (req, res) =>
   res.sendFile(path.join(__dirname, 'node_modules', 'html5-qrcode', 'html5-qrcode.min.js')));
@@ -311,7 +319,29 @@ app.post('/api/admin/login', limit('admin', 5, 900e3), (req, res) => {
   adminSessions.set(t, { exp: Date.now() + 14 * 3600e3, name: m.name, owner: !!m.owner });
   res.json({ token: t, name: m.name });
 });
-app.get('/api/admin/me', adminAuth, (req, res) => res.json({ name: req.staff.name }));
+app.get('/api/admin/me', adminAuth, (req, res) => res.json({ name: req.staff.name, owner: !!req.staff.owner }));
+
+// ---------- Obavijesti za web (Agent NOMAd ih čita) ----------
+function zgDanas() { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Zagreb' }).format(new Date()); }
+function aktivneObavijesti() {
+  return db.prepare('SELECT id, tekst, vrijedi_do, created_at FROM obavijesti WHERE vrijedi_do IS NULL OR vrijedi_do >= ? ORDER BY id DESC LIMIT 30').all(zgDanas());
+}
+function ownerOnly(req, res, next) { return req.staff.owner ? next() : res.status(403).json({ error: 'Obavijesti uređuje samo vlasnik.' }); }
+app.get('/api/admin/obavijesti', adminAuth, ownerOnly, (req, res) => {
+  res.json({ danas: zgDanas(), list: db.prepare('SELECT id, tekst, vrijedi_do, created_at FROM obavijesti ORDER BY id DESC LIMIT 60').all() });
+});
+app.post('/api/admin/obavijesti', adminAuth, ownerOnly, (req, res) => {
+  const tekst = String(req.body.tekst || '').trim().slice(0, 1000);
+  const doDat = String(req.body.vrijediDo || '').trim();
+  if (tekst.length < 3) return res.status(400).json({ error: 'Upiši tekst obavijesti.' });
+  if (doDat && !/^\d{4}-\d{2}-\d{2}$/.test(doDat)) return res.status(400).json({ error: 'Datum nije ispravan.' });
+  db.prepare('INSERT INTO obavijesti (tekst, vrijedi_do, autor) VALUES (?,?,?)').run(tekst, doDat || null, req.staff.name);
+  res.json({ ok: true });
+});
+app.post('/api/admin/obavijesti/:id/obrisi', adminAuth, ownerOnly, (req, res) => {
+  db.prepare('DELETE FROM obavijesti WHERE id=?').run(parseInt(req.params.id, 10) || 0);
+  res.json({ ok: true });
+});
 app.post('/api/admin/redeem', adminAuth, (req, res) => {
   const code = String(req.body.code || '').trim().toUpperCase();
   const r = db.prepare('SELECT r.*, u.name AS guest FROM rewards r JOIN users u ON u.id=r.user_id WHERE r.code=?').get(code);

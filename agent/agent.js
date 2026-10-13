@@ -121,7 +121,7 @@ function danas() {
   return { text: f.format(new Date()), iso };
 }
 
-function sustav({ podaci, cjenik, prognoza, objave, normativi = '' }) {
+function sustav({ podaci, cjenik, prognoza, objave, normativi = '', obavijesti = [] }) {
   const d = danas();
   return `Ti si Agent NOMAd, veseli kauboj-domaćin NOMAd Caffe Bara u Novom Marofu. Odgovaraš gostima na web stranici.
 Danas je ${d.text} (${d.iso}).
@@ -133,6 +133,7 @@ PRAVILA
 - Cijene piši u eurima kao u cjeniku (npr. 2,40 €).
 - Alkohol ne nudi maloljetnicima.
 - Prognozu daj samo iz podataka o vremenu, za Novi Marof.
+- NAŠE OBAVIJESTI upisuje vlasnik i imaju PREDNOST pred svim ostalim podacima (akcije, događanja, promjene radnog vremena, zatvoreno, novi artikli). Ako obavijest za neki datum mijenja redovno stanje, za taj datum vrijedi obavijest. Ne spominji obavijesti za datume koji su prošli.
 - NOVOSTI S FACEBOOKA su naše objave (najnovije prve): koristi ih za akcije, događanja i promjene radnog vremena. Ako objava za neki datum mijenja redovno stanje, za taj datum vrijedi objava. Ne najavljuj događanja koja su prošla. Smiješ dati link objave. Ako nema ničeg aktualnog, reci to i uputi na ${podaci.facebook || 'naš Facebook'}.
 - SASTAV (normativi): kad gost pita od čega se nešto sastoji ili što je unutra, odgovori iz popisa SASTAV PIĆA I JELA. Naziv u popisu može biti malo drugačiji od cjenika (npr. "MALA KAVA S MLIJEKOM" = "Kava s mlijekom mala") – poveži ih razumno. Sastojke navedi prirodnim jezikom (npr. "espresso od 8 g kave i 50 ml mlijeka"). Ne spominji interne šifre ni skladišne oznake. Ako artikla nema u popisu, reci da sastav nemaš i uputi na osoblje.
 - Za alergene i posebne prehrane nemaš potpune podatke: navedi sastojke koje znaš i obavezno savjetuj da gost provjeri s osobljem.
@@ -149,6 +150,9 @@ ${prognoza || 'Prognoza trenutno nije dostupna.'}
 
 SASTAV PIĆA I JELA (normativi, količine za jednu porciju)
 ${normativi || 'Normativi trenutno nisu dostupni.'}
+
+NAŠE OBAVIJESTI (najnovije prve)
+${obavijesti.length ? obavijesti.map(o => `[upisano ${String(o.created_at).slice(0, 10)}${o.vrijedi_do ? ', vrijedi do ' + o.vrijedi_do : ''}] ${o.tekst}`).join('\n') : 'Trenutno nema posebnih obavijesti.'}
 
 NOVOSTI S FACEBOOKA
 ${objave.length ? objave.map(o => `[${o.datum}] ${o.tekst} (${o.link})`).join('\n\n') : 'Nema učitanih objava.'}`;
@@ -191,7 +195,7 @@ function cleanMessages(list) {
   return out;
 }
 
-function mount(app, { fetchImpl = globalThis.fetch, inventuraDb = null } = {}) {
+function mount(app, { fetchImpl = globalThis.fetch, inventuraDb = null, obavijesti = () => [] } = {}) {
   const widget = path.join(__dirname, 'widget.js');
   app.get('/agent-nomad.js', (req, res) => {
     res.set('Cache-Control', 'public, max-age=600');
@@ -214,7 +218,7 @@ function mount(app, { fetchImpl = globalThis.fetch, inventuraDb = null } = {}) {
     if (!key) return res.status(503).json({ error: 'Agent se upravo sedla. Za sva pitanja nazovi +385 91 934 5741.' });
     try {
       const [prognoza, objave] = await Promise.all([vrijeme(fetchImpl), fbObjave(fetchImpl)]);
-      const system = sustav({ podaci: loadPodaci(), cjenik: loadCjenik(), prognoza, objave, normativi: loadNormativi(inventuraDb) });
+      const system = sustav({ podaci: loadPodaci(), cjenik: loadCjenik(), prognoza, objave, normativi: loadNormativi(inventuraDb), obavijesti: (() => { try { return obavijesti(); } catch (e) { console.error('agent: obavijesti', e.message); return []; } })() });
       const r = await fetchImpl(API_URL, {
         method: 'POST', signal: AbortSignal.timeout(30000),
         headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
