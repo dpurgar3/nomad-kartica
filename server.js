@@ -14,6 +14,11 @@ const CFG = {
   port: int(process.env.PORT, 3000),
   dbFile: process.env.DB_FILE || path.join(__dirname, 'data', 'nomad.db'),
   adminPin: process.env.ADMIN_PIN || '',
+  // Dodatni članovi osoblja (vlasnik se prijavljuje s ADMIN_PIN). Povezuju se s gostom po imenu.
+  staff: [
+    { name: 'Marina Markova', pin: '0000' },
+    { name: 'Matija Kuzmić', pin: '1111' },
+  ],
   wifiSsid: process.env.WIFI_SSID || 'ASUS - NOMAd',
   wifiPassword: process.env.WIFI_PASSWORD || '',
   pointsPerReceipt: int(process.env.POINTS_PER_RECEIPT, 10),
@@ -27,7 +32,7 @@ const CFG = {
   // OIB izdavatelja: bodove donose samo računi na kojima je otisnut ovaj OIB (Ugostiteljski obrt Artist)
   oib: (process.env.NOMAD_OIB || '53253782263').replace(/\D/g, ''),
 };
-if (!CFG.adminPin || CFG.adminPin.length < 4) {
+if ((!CFG.adminPin || CFG.adminPin.length < 4) && !CFG.staff.length) {
   console.warn('UPOZORENJE: ADMIN_PIN nije postavljen (min. 4 znamenke) – ekran za osoblje je isključen.');
 }
 
@@ -75,6 +80,10 @@ CREATE TABLE IF NOT EXISTS rewards (
 );
 CREATE INDEX IF NOT EXISTS idx_receipts_user_day ON receipts(user_id, zg_day);
 `);
+// tko je potvrdio nagradu / dodao bodove
+for (const sql of ['ALTER TABLE rewards ADD COLUMN redeemed_by TEXT', 'ALTER TABLE adjustments ADD COLUMN staff TEXT']) {
+  try { db.exec(sql); } catch (e) { if (!/duplicate column/i.test(e.message)) throw e; }
+}
 
 // ---------- Pomoćne ----------
 function int(v, d) { const n = parseInt(v, 10); return Number.isFinite(n) ? n : d; }
@@ -277,19 +286,32 @@ app.get('/api/reward/:code/qr.svg', async (req, res) => {
 // ---------- Osoblje ----------
 const adminSessions = new Map();
 function adminAuth(req, res, next) {
-  const t = req.get('X-Admin'), exp = t && adminSessions.get(t);
-  if (!exp || exp < Date.now()) return res.status(401).json({ error: 'Prijavi se PIN-om osoblja.' });
+  const t = req.get('X-Admin'), sess = t && adminSessions.get(t);
+  if (!sess || sess.exp < Date.now()) return res.status(401).json({ error: 'Prijavi se PIN-om osoblja.' });
+  req.staff = sess;
   next();
+}
+function pinEq(pin, ref) {
+  const a = Buffer.from(String(pin)), b = Buffer.from(String(ref || ''));
+  return b.length >= 4 && a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+function normName(n) { return String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase().replace(/\s+/g, ' ').trim(); }
+// gostinska kartica člana osoblja (traži se po imenu, pa radi i ako se registrira kasnije)
+function staffGuestIds(name) {
+  const n = normName(name);
+  return db.prepare('SELECT id, name FROM users').all().filter(u => normName(u.name) === n).map(u => u.id);
 }
 app.post('/api/admin/login', limit('admin', 5, 900e3), (req, res) => {
   const pin = String(req.body.pin || '');
-  if (!CFG.adminPin || CFG.adminPin.length < 4) return res.status(503).json({ error: 'PIN osoblja nije postavljen na serveru.' });
-  const a = Buffer.from(pin), b = Buffer.from(CFG.adminPin);
-  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return res.status(401).json({ error: 'Pogrešan PIN.' });
+  const members = [{ name: 'Dražen', pin: CFG.adminPin, owner: true }, ...CFG.staff].filter(m => m.pin && m.pin.length >= 4);
+  if (!members.length) return res.status(503).json({ error: 'PIN osoblja nije postavljen na serveru.' });
+  const m = members.find(x => pinEq(pin, x.pin));
+  if (!m) return res.status(401).json({ error: 'Pogrešan PIN.' });
   const t = crypto.randomBytes(24).toString('hex');
-  adminSessions.set(t, Date.now() + 14 * 3600e3);
-  res.json({ token: t });
+  adminSessions.set(t, { exp: Date.now() + 14 * 3600e3, name: m.name, owner: !!m.owner });
+  res.json({ token: t, name: m.name });
 });
+app.get('/api/admin/me', adminAuth, (req, res) => res.json({ name: req.staff.name }));
 app.post('/api/admin/redeem', adminAuth, (req, res) => {
   const code = String(req.body.code || '').trim().toUpperCase();
   const r = db.prepare('SELECT r.*, u.name AS guest FROM rewards r JOIN users u ON u.id=r.user_id WHERE r.code=?').get(code);
@@ -297,7 +319,9 @@ app.post('/api/admin/redeem', adminAuth, (req, res) => {
   if (r.status === 'redeemed') return res.status(409).json({ error: `Kod je već iskorišten (${new Date(r.redeemed_at.replace(' ', 'T') + 'Z').toLocaleString('hr-HR', { timeZone: 'Europe/Zagreb' })}).` });
   if (db.prepare(`SELECT expires_at <= datetime('now') AS x FROM rewards WHERE id=?`).get(r.id).x)
     return res.status(410).json({ error: 'Kodu je istekao rok.' });
-  db.prepare(`UPDATE rewards SET status='redeemed', redeemed_at=datetime('now') WHERE id=?`).run(r.id);
+  if (!req.staff.owner && staffGuestIds(req.staff.name).includes(r.user_id))
+    return res.status(403).json({ error: 'Vlastitu nagradu ne možeš sam potvrditi – neka to napravi drugi član osoblja.' });
+  db.prepare(`UPDATE rewards SET status='redeemed', redeemed_at=datetime('now'), redeemed_by=? WHERE id=?`).run(req.staff.name, r.id);
   res.json({ ok: true, guest: r.guest, item: r.name, cardNo: cardNo(r.user_id) });
 });
 app.get('/api/admin/lookup', adminAuth, (req, res) => {
@@ -314,8 +338,10 @@ app.post('/api/admin/points', adminAuth, (req, res) => {
   if (!u) return res.status(404).json({ error: 'Gost nije pronađen.' });
   if (!Number.isFinite(pts) || pts === 0 || Math.abs(pts) > 100) return res.status(400).json({ error: 'Bodovi: od -100 do 100.' });
   if (u.points + pts < 0) return res.status(400).json({ error: 'Gost nema toliko bodova.' });
+  if (!req.staff.owner && staffGuestIds(req.staff.name).includes(id))
+    return res.status(403).json({ error: 'Sebi ne možeš mijenjati bodove.' });
   db.transaction(() => {
-    db.prepare('INSERT INTO adjustments (user_id, points, note) VALUES (?,?,?)').run(id, pts, note);
+    db.prepare('INSERT INTO adjustments (user_id, points, note, staff) VALUES (?,?,?,?)').run(id, pts, note, req.staff.name);
     db.prepare('UPDATE users SET points = points + ? WHERE id=?').run(pts, id);
   })();
   res.json({ ok: true, points: u.points + pts, name: u.name });

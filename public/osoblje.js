@@ -14,6 +14,7 @@
   function logout() { token = null; try { sessionStorage.removeItem('nomadAdmin'); } catch {} stopCam(); $('aMain').classList.add('hidden'); $('aLogin').classList.remove('hidden'); }
   async function enter() {
     $('aLogin').classList.add('hidden'); $('aMain').classList.remove('hidden'); loadStats();
+    try { const me = await api('/api/admin/me'); $('who').textContent = `Prijavljen/a: ${me.name}`; } catch {}
   }
   async function loadStats() {
     try {
