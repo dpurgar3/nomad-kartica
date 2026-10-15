@@ -318,7 +318,7 @@ ROUTES.promjene = async () => {
   const mvMic = $('#mvMic');
   if (mvMic) mvMic.onclick = () => startVoice(mvMic, texts => {
     for (const t of texts) {
-      const p = Voice.parseUtterance(t); const m = Voice.matchArticles(p.query, arts)[0];
+      const p = Voice.parseForItems(t, arts); const m = p.candidates[0];
       if (!m) continue;
       form.art.value = `${m.item.code} · ${m.item.name}`; upd();
       if (p.qty != null) form.qty.value = String(p.qty).replace('.', ',');
@@ -403,7 +403,7 @@ ROUTES.inventura = async id => {
       ${open ? `<label class="btn primary mic" id="cntCam" title="Brojanje sa slike">📷 Slikaj<input type="file" id="cntCamFile" accept="image/*" capture="environment" hidden></label>` : ''}
       <select id="ishow"><option value="sve">Svi</option><option value="neprebrojano">Neprebrojani</option><option value="razlike">Samo razlike</option><option value="prebrojano">Prebrojani</option></select>
     </div></div>
-    ${open && VOICE ? `<p class="muted small no-print">Glasovno brojanje: pritisni 🎤 i reci naziv i količinu, npr. „coca cola dvadeset četiri”, „jamnica dvije gajbe”, „limun jedan i pol kila”. Prije upisa potvrđuješ.</p>` : ''}
+    ${open && VOICE ? `<p class="muted small no-print">Glasovno brojanje: pritisni 🎤 i reci naziv i količinu, npr. „coca cola dvadeset četiri”, „ožujsko nula trideset tri deset”, „jamnica dvije gajbe”. Ako ne kažeš količinu, mikrofon se sam uključi da je izgovoriš. Nakon „= Postavi” odmah sluša sljedeći artikl. Prije upisa potvrđuješ.</p>` : ''}
     ${open && !VOICE ? `<p class="muted small no-print">Glasovni unos nije podržan u ovom pregledniku (koristi Chrome ili Safari).</p>` : ''}
     ${open ? `<p class="muted small no-print">Brojanje sa slike: pritisni 📷 i uslikaj policu ili hladnjak. AI prepozna artikle s popisa i predloži količine, a ti ih prije upisa provjeriš.</p>` : ''}
     ${s.unpricedDiffs ? `<p class="note">${s.unpricedDiffs} razlika nema nabavnu cijenu pa nisu uključene u vrijednost. Dodaj cijenu u Artiklima.</p>` : ''}
@@ -512,17 +512,18 @@ ROUTES.inventura = async id => {
   }
   function voiceCount(texts) {
     let p = null, cands = [], heard = texts[0];
-    for (const t of texts) { const pp = Voice.parseUtterance(t); const c = Voice.matchArticles(pp.query, d.items); if (c.length && pp.qty != null) { p = pp; cands = c; heard = t; break; } if (!p && c.length) { p = pp; cands = c; heard = t; } }
+    for (const t of texts) { const pp = Voice.parseForItems(t, d.items); const c = pp.candidates; if (c.length && pp.qty != null) { p = pp; cands = c; heard = t; break; } if (!p && c.length) { p = pp; cands = c; heard = t; } }
     if (!p || !cands.length) return toast(`Nisam prepoznao artikl: „${heard}”`, true);
     const top = cands.slice(0, 4);
     dialog(`<h2>🎤 „${esc(heard)}”</h2>
       <div class="form"><label class="f" style="grid-column:1/-1">Artikl<select name="item">${top.map((c, k) => `<option value="${c.item.id}" ${k === 0 ? 'selected' : ''}>${esc(c.item.name)} (${esc(c.item.unit)}) — prebrojano ${c.item.counted_qty_e4 == null ? 'ništa' : fq(c.item.counted_qty_e4)}</option>`).join('')}</select></label>
-      <label class="f">Količina<input name="qty" inputmode="decimal" required value="${p.qty == null ? '' : String(p.qty).replace('.', ',')}"></label>
+      <label class="f">Količina<span class="row" style="flex-wrap:nowrap"><input name="qty" inputmode="decimal" required class="grow" value="${p.qty == null ? '' : String(p.qty).replace('.', ',')}">${micHtml('qtyMic', 'Izgovori količinu')}</span></label>
       <label class="f">Jedinica / pakiranje<select name="u" id="vU"></select></label></div>
-      <label class="c"><input type="checkbox" name="again" ${localStorage.getItem('invVoiceAgain') === '1' ? 'checked' : ''}> Nakon upisa odmah slušaj sljedeći artikl</label>
+      <label class="c"><input type="checkbox" name="again" ${localStorage.getItem('invVoiceAgain') !== '0' ? 'checked' : ''}> Nakon upisa odmah slušaj sljedeći artikl</label>
       <div class="row end">${cancelBtn()}<button class="btn" value="add" title="Dodaj na već prebrojano">+ Dodaj</button><button class="btn primary" value="set">= Postavi</button></div>`,
     async (fd, b) => {
-      const item = d.items.find(i => i.id === Number(fd.get('item'))); const u = fd.get('u') || '';
+      if (activeRec) { try { activeRec.abort(); } catch {} activeRec = null; }
+const item = d.items.find(i => i.id === Number(fd.get('item'))); const u = fd.get('u') || '';
       try { localStorage.setItem('invVoiceAgain', fd.get('again') === 'on' ? '1' : '0'); } catch {}
       await api(`/items/${item.id}/count`, { method: b === 'add' ? 'POST' : 'PUT', body: { qty: fd.get('qty'), unit: u.startsWith('u:') ? u.slice(2) : undefined, packagingId: u.startsWith('p:') ? Number(u.slice(2)) : undefined } });
       toast(`Upisano: ${item.name}`);
@@ -537,6 +538,23 @@ ROUTES.inventura = async id => {
       $('#dlgErr').textContent = r.error || '';
     };
     $('#dlgForm [name=item]').onchange = fillUnits; fillUnits();
+// količina se može izgovoriti posebno; ako nije izgovorena, mikrofon se sam uključi
+const qm = $('#qtyMic');
+if (qm) {
+qm.onclick = () => startVoice(qm, ts => {
+const it = d.items.find(i => i.id === Number($('#dlgForm [name=item]').value));
+for (const t of ts) {
+const q = Voice.parseUtterance('x ' + t);
+if (q.qty == null) continue;
+$('#dlgForm [name=qty]').value = String(q.qty).replace('.', ',');
+const r = Voice.resolveUnit(q, it);
+if (r.packagingId) $('#vU').value = 'p:' + r.packagingId; else if (r.unit) $('#vU').value = 'u:' + r.unit;
+return;
+}
+toast(`Nisam razumio količinu: „${ts[0]}”`, true);
+});
+if (p.qty == null) { let tries = 0; const tick = () => { if (!$('#dlg').open) return; if (activeRec) { if (++tries < 10) setTimeout(tick, 200); return; } qm.click(); }; setTimeout(tick, 300); }
+}
     $('#dlgForm [name=qty]').focus(); $('#dlgForm [name=qty]').select();
   }
 
