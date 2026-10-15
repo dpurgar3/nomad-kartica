@@ -340,6 +340,26 @@ test('glasovni unos: prepoznavanje artikla i pakiranja', () => {
   assert.deepEqual(V.resolveUnit({ unit: 'l' }, { unit: 'kom' }), { unit: 'l', label: 'l' });
 });
 
+test('glasovni unos: veličina iz naziva nije količina (ožujsko 0,33 deset)', () => {
+const V = require('../inventura/public/voice');
+const items = SEED.artikli.map((a, i) => ({ id: i, name: a.naziv, unit: 'kom', packagings: [] }));
+const P = t => { const r = V.parseForItems(t, items); return [r.candidates[0]?.item.name, r.qty]; };
+assert.deepEqual(P('pivo ožujsko 0,33 10'), ['OŽUJSKO PIVO 0,33l', 10]);
+assert.deepEqual(P('Pivo Ožujsko 0,33 deset'), ['OŽUJSKO PIVO 0,33l', 10]);
+assert.deepEqual(P('pivo ožujsko 0 33 10'), ['OŽUJSKO PIVO 0,33l', 10]);
+assert.deepEqual(P('pivo ožujsko 033 10'), ['OŽUJSKO PIVO 0,33l', 10]);
+assert.deepEqual(P('pivo ožujsko nula trideset tri deset'), ['OŽUJSKO PIVO 0,33l', 10]);
+assert.deepEqual(P('ožujsko 0,33 l 10'), ['OŽUJSKO PIVO 0,33l', 10]);
+assert.deepEqual(P('ožujsko trideset tri deset'), ['OŽUJSKO PIVO 0,33l', 10]);
+assert.deepEqual(P('pivo ožujsko 033'), ['OŽUJSKO PIVO 0,33l', null]); // količina nije izgovorena, ne 33
+assert.deepEqual(P('pivo ožujsko 0 33'), ['OŽUJSKO PIVO 0,33l', null]);
+assert.deepEqual(P('pivo ožujsko 0,5 24'), ['OŽUJSKO PIVO 0,50l', 24]);
+assert.deepEqual(P('pivo ožujsko nula pet dvadeset četiri'), ['OŽUJSKO PIVO 0,50l', 24]);
+assert.deepEqual(P('coca cola zero 24'), ['COCA COLA / ZERO 0,25l', 24]);
+assert.deepEqual(P('stella artois 10'), ['STELLA ARTOIS PIVO 0,33l', 10]);
+assert.equal(V.parseUtterance('ožujsko 033').qty, null);
+});
+
 // ======================= NORMATIVI, PRODAJA, UTROŠAK =======================
 const { createConsumption } = require('../inventura/consumption');
 const SC = require('../inventura/salescsv');
