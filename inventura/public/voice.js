@@ -170,20 +170,87 @@
     return { query, qty, unit: unit?.unit || null, pack: unit?.pack || null, size, candidates: cands };
   }
 
-  /** Nađi najbolji artikl za izgovoreni naziv. Vraća [{item, score}] silazno. */
+  // ---------- izgovor stranih naziva ----------
+  // Prepoznavanje govora piše kako se čuje: "sinar" (Cynar), "koka kola" (Coca Cola), "džek denijels" (Jack Daniel's).
+  // Za svaki brend popis izgovora (pišu se s dijakriticima, uspoređuju bez njih).
+  const ALIASES = {
+    'coca cola': ['koka kola', 'kokakola', 'koka', 'kola'], 'cocta': ['kokta', 'cockta'], 'cynar': ['sinar', 'činar', 'cinar'],
+    'schweppes': ['šveps', 'švepes', 'sveps', 'švaps'], 'sprite': ['sprajt', 'sprit'], 'red bull': ['red bul', 'redbul', 'red bal'],
+    'toco': ['toko'], 'lemonish': ['lemoniš', 'limoniš', 'lemonis'], 'senzation': ['senzejšn', 'senzejšen', 'senzacija', 'sensation'],
+    'hidra': ['hidra', 'hydra'], 'romerquelle': ['remerkvele', 'romerkvele', 'römerquelle', 'remer'], 'pago': ['pago'],
+    'becks': ['beks', 'bek'], 'stella artois': ['stela artoa', 'stela artois', 'stela'], 'lefe': ['lef', 'lefe', 'leffe'],
+    'pale ale': ['pejl ejl', 'pejl el', 'pejlejl'], 'ipa': ['ipa', 'aj pi ej'], 'madri': ['madri', 'madrid'],
+    'jack daniel': ['džek denijels', 'džek danijels', 'džek deniels', 'džek danijel', 'džek', 'dzek'],
+    'gentleman jack': ['džentlmen džek', 'džentlmen', 'dzentlmen'], 'jagermeister': ['jegermajster', 'jegermeister', 'jagermajster', 'jeger', 'jäger'],
+    'hennessy': ['henesi', 'henesy', 'henesij'], 'courvoisier': ['kurvoazje', 'kurvoazije', 'kurvazje', 'kurvoazier', 'kurvoazije'],
+    'martell': ['martel'], 'bacardi': ['bakardi'], 'campari': ['kampari'], 'aperol': ['aperol'],
+    'tangeray': ['tankeri', 'tankerej', 'tanker', 'tanqueray'], 'famous grouse': ['fejmus graus', 'fejmos graus', 'graus', 'fejmus'],
+    'bulldog': ['buldog'], 'stock': ['stok', 'štok'], 'vodka': ['votka'], 'gin': ['džin', 'dzin'],
+    'martini bianco': ['martini bjanko', 'martini bijanko', 'bjanko'], 'limoncello': ['limončelo', 'limunčelo', 'limoncelo'],
+    'sailors queen': ['sejlors kvin', 'sejlor kvin', 'sejlors'], 'cherry brandy': ['čeri brendi', 'čeri brandi', 'čeri', 'brendi'],
+    'vermouth': ['vermut'], 'chardonnay': ['šardone', 'šardonej', 'sardone'], 'cappuccino': ['kapučino', 'kapucino'],
+    'roche': ['roš', 'roše'], 'sorbet': ['sorbe', 'šorbe'], 'minions': ['minjons', 'minions', 'minjoni'], 'kontiki': ['kon tiki'],
+    'cedevita': ['cedevita'], 'refosk': ['refošk'], 'amaro': ['amaro'],
+  };
+
+  /** Fonetski ključ: piše riječ kako se izgovara ("cynar" → "sinar", "coca" → "koka", "schweppes" → "svepes"). */
+  function phon(w) {
+    if (/^\d/.test(w)) return w;
+    return w.replace(/sch/g, 's').replace(/ph/g, 'f').replace(/th/g, 't').replace(/ck/g, 'k').replace(/qu/g, 'kv')
+      .replace(/x/g, 'ks').replace(/w/g, 'v').replace(/y/g, 'i').replace(/q/g, 'k').replace(/ch/g, 'c').replace(/dz/g, 'z')
+      .replace(/ee/g, 'i').replace(/oo/g, 'u').replace(/ou/g, 'u').replace(/a[iy]/g, 'ej')
+      .replace(/c(?=[ei])/g, 's').replace(/c/g, 'k')
+      .replace(/(.)\1+/g, '$1');
+  }
+  function lev(a, b) {
+    const m = a.length, n = b.length; if (!m || !n) return m || n;
+    let prev = Array.from({ length: n + 1 }, (_, j) => j);
+    for (let i = 1; i <= m; i++) {
+      const cur = [i];
+      for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = cur;
+    }
+    return prev[n];
+  }
+  const sim = (a, b) => 1 - lev(a, b) / Math.max(a.length, b.length);
+  const ALIAS_LIST = Object.entries(ALIASES).map(([k, v]) => [new RegExp('(^| )' + norm(k) + '( |$)'), v.map(norm)]);
+  const nameCache = new Map();
+  function nameInfo(name) {
+    let r = nameCache.get(name); if (r) return r;
+    const n = norm(name); const toks = n.split(' ');
+    const words = toks.filter(t => t.length >= 2 && !/^\d/.test(t));
+    for (const [re, al] of ALIAS_LIST) if (re.test(n)) for (const a of al) words.push(...a.split(' '), a.replace(/ /g, ''));
+    const keys = new Set(words.map(phon));
+    for (let i = 0; i + 1 < toks.length; i++) keys.add(phon(toks[i] + toks[i + 1])); // "red bull" → "redbul"
+    r = { n, toks, keys: [...keys], first: phon(words[0] || '') };
+    if (nameCache.size > 2000) nameCache.clear();
+    nameCache.set(name, r); return r;
+  }
+
+  /** Nađi najbolji artikl za izgovoreni naziv (i po izgovoru: "sinar" → Cynar). Vraća [{item, score}] silazno. */
   function matchArticles(query, items, nameOf = x => x.name) {
     const q = norm(query).split(' ').filter(w => w.length >= 2 && !/^\d/.test(w) && !SIZE_UNIT.test(w));
     if (!q.length) return [];
+    const qp = q.map(phon);
     const out = [];
     for (const it of items) {
-      const n = norm(nameOf(it)); const toks = n.split(' ');
+      const { n, toks, keys, first } = nameInfo(nameOf(it));
       let score = 0;
-      for (const w of q) {
-        if (toks.includes(w)) score += 3;
-        else if (toks.some(t => t.startsWith(w) || (w.length >= 4 && w.startsWith(t) && t.length >= 3))) score += 2;
-        else if (w.length >= 4 && n.includes(w.slice(0, 4))) score += 1;
+      for (let k = 0; k < q.length; k++) {
+        const w = q[k], pw = qp[k];
+        let s = 0;
+        if (toks.includes(w) || keys.includes(pw)) s = 3;
+        else if (toks.some(t => t.startsWith(w) || (w.length >= 4 && w.startsWith(t) && t.length >= 3))) s = 2;
+        else if (pw.length >= 3 && keys.some(t => t.startsWith(pw) || (pw.length >= 4 && pw.startsWith(t) && t.length >= 4))) s = 2;
+        else if (k + 1 < q.length && keys.includes(phon(w + q[k + 1]))) s = 3; // "koka" + "kola" spojeno
+        else if (pw.length >= 4) {
+          let best = 0; for (const t of keys) if (t.length >= 3) best = Math.max(best, sim(pw, t));
+          s = best >= 0.8 ? 2 : best >= 0.67 ? 1 : 0;
+        }
+        if (!s && w.length >= 4 && n.includes(w.slice(0, 4))) s = 1;
+        score += s;
       }
-      if (score > 0) out.push({ item: it, score: score / q.length + (n.startsWith(q[0]) ? 0.5 : 0) });
+      if (score > 0) out.push({ item: it, score: score / q.length + (n.startsWith(q[0]) || first === qp[0] ? 0.5 : 0) });
     }
     return out.sort((a, b) => b.score - a.score);
   }
@@ -211,6 +278,6 @@
     return r;
   }
 
-  const api = { norm, wordsToNumber, parseUtterance, parseForItems, sizesOf, readSize, matchArticles, resolveUnit, supported, listen };
+  const api = { norm, phon, wordsToNumber, parseUtterance, parseForItems, sizesOf, readSize, matchArticles, resolveUnit, supported, listen };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Voice = api;
 })(typeof window !== 'undefined' ? window : globalThis);
