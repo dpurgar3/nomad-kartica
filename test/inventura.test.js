@@ -360,6 +360,22 @@ assert.deepEqual(P('stella artois 10'), ['STELLA ARTOIS PIVO 0,33l', 10]);
 assert.equal(V.parseUtterance('ožujsko 033').qty, null);
 });
 
+test('glasovni unos: strani nazivi po izgovoru (sinar, koka kola, džek denijels)', () => {
+const V = require('../inventura/public/voice');
+const items = SEED.artikli.map((a, i) => ({ id: i, name: a.naziv, unit: 'kom', packagings: [] }));
+const top = t => V.parseForItems(t, items).candidates[0]?.item.name;
+assert.equal(V.phon('cynar'), V.phon('sinar'));
+assert.equal(V.phon('coca'), V.phon('koka'));
+assert.equal(top('sinar 3'), 'Cynar Bitter');
+assert.equal(top('koka kola zero 24'), 'COCA COLA / ZERO 0,25l');
+assert.equal(top('šveps 8'), 'SCHWEPPES SOKOVI RAZNI 0,25 L.');
+assert.equal(top('džek denijels 2'), "Jack Daniel's lit");
+assert.equal(top('jegermajster 3'), 'Jagermeister lit');
+assert.equal(top('henesi 1'), 'Hennessy lit');
+assert.equal(top('stela artoa 10'), 'STELLA ARTOIS PIVO 0,33l');
+assert.equal(V.parseForItems('telefon 2', items).candidates.length, 0);
+});
+
 // ======================= NORMATIVI, PRODAJA, UTROŠAK =======================
 const { createConsumption } = require('../inventura/consumption');
 const SC = require('../inventura/salescsv');
