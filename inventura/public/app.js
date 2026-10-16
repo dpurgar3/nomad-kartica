@@ -390,8 +390,8 @@ ROUTES.inventura = async id => {
         <a class="btn" href="${csvUrl('inventory/' + inv.id)}">CSV</a>
         ${open ? `<button class="btn" id="refresh" title="Postavi očekivano na trenutno knjižno stanje">Osvježi očekivano</button>
         <button class="btn danger" id="delInv">Obriši</button><button class="btn primary" id="review">Pregled i zaključivanje</button>` : ''}
-        <a class="btn" href="/inventura/api/print/inventory/${inv.id}?mode=lista&auto=1" target="_blank" rel="noopener">🖨️ Inventurna lista</a>
-        ${open ? '' : `<a class="btn" href="/inventura/api/print/inventory/${inv.id}?mode=rezultat&auto=1" target="_blank" rel="noopener">🖨️ Ispis rezultata</a>`}
+        <a class="btn" href="/inventura/api/print/inventory/${inv.id}?mode=lista" target="_blank" rel="noopener">🖨️ Inventurna lista</a>
+        ${open ? '' : `<a class="btn" href="/inventura/api/print/inventory/${inv.id}?mode=rezultat" target="_blank" rel="noopener">🖨️ Ispis rezultata</a>`}
       </div></div>
     <div class="sticky-sum"><div class="grid">
       <div class="card stat"><div class="v">${s.counted} / ${s.total}</div><div class="l">Prebrojano</div></div>

@@ -51,7 +51,7 @@ function inventoryPrintHtml(inv, items, summary, opt = {}) {
       ${mode === 'lista' ? `<a href="${self({ slijepo: blind ? '' : '1' })}">${blind ? 'Prikaži knjižno stanje' : 'Sakrij knjižno (slijepo brojanje)'}</a>` : `<a href="${self({ only: opt.only === 'razlike' ? '' : 'razlike' })}">${opt.only === 'razlike' ? 'Svi artikli' : 'Samo razlike'}</a>`}
       <a href="?${new URLSearchParams({ mode: mode === 'lista' ? 'rezultat' : 'lista' })}">${mode === 'lista' ? 'Rezultat inventure' : 'Lista za brojanje'}</a>
       <a href="${esc(opt.base || '/inventura/')}">← Natrag</a>
-      <p>Ako se prozor za ispis ne otvori: u izborniku preglednika (⋮) odaberi <b>Dijeli → Ispis</b> (Chrome) ili <b>Ispis/PDF</b> (Samsung Internet), pa odaberi bežični pisač ili „Spremi kao PDF”.</p>
+      <p>Pritisni <b>🖨️ Ispiši</b> tek kad vidiš tablicu. Ako se prozor za ispis ne otvori: u izborniku preglednika (⋮) odaberi <b>Dijeli → Ispis</b> (Chrome) ili <b>Ispis/PDF</b> (Samsung Internet), pa odaberi bežični pisač ili „Spremi kao PDF”.</p>
     </div>`;
 
   return `<!doctype html><html lang="hr"><head><meta charset="utf-8">
@@ -89,7 +89,7 @@ ${toolbar}
   <tbody>${body.join('') || `<tr><td colspan="${cols.length}">Nema artikala.</td></tr>`}</tbody></table></div>
   <div class="sign"><div>Popisao/la (ime, potpis)</div><div>Kontrolirao/la (ime, potpis)</div><div>Datum i vrijeme</div></div>
 </div>
-${opt.auto ? '<script>addEventListener("load",()=>setTimeout(()=>{try{window.print()}catch(e){}},400))</script>' : ''}
+${opt.auto ? '<script>addEventListener("load",()=>{if(/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent))return;(document.fonts?document.fonts.ready:Promise.resolve()).then(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(()=>{try{window.print()}catch(e){}},300))))})</script>' : ''}
 </body></html>`;
 }
 
