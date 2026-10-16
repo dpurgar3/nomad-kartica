@@ -15,6 +15,7 @@ const { createConsumption } = require('./consumption');
 const SC = require('./salescsv');
 const D = require('./decimal');
 const photo = require('./photo');
+const P = require('./print');
 
 const SEED = path.join(__dirname, 'seed', 'stanje-2026-10-09.json');
 const SEED_RECIPES = path.join(__dirname, 'seed', 'normativi-remaris.json');
@@ -206,6 +207,14 @@ function createInventura({ dbFile, envPin = '', adminPin = '', seed = true } = {
     let items = svc.inventoryItems(id);
     if (req.query.only === 'razlike') items = items.filter(i => i.kind === 'visak' || i.kind === 'manjak');
     sendCsv(res, `inventura-${inv.inv_date}-${id}.csv`, C.inventoryCsv(inv, items));
+  }));
+
+  // ispisna stranica (svijetla, A4) – pouzdan ispis i s mobitela na bežični pisač
+  router.get('/api/print/inventory/:id', h((req, res) => {
+    const id = Number(req.params.id); const inv = svc.inventory(id);
+    res.set('Content-Type', 'text/html; charset=utf-8');
+    res.send(P.inventoryPrintHtml(inv, svc.inventoryItems(id), svc.inventorySummary(id), {
+      mode: req.query.mode, blind: req.query.slijepo === '1', only: req.query.only, auto: req.query.auto === '1', base: '/inventura/#/inventura/' + id }));
   }));
 
   // ---------- postavke ----------

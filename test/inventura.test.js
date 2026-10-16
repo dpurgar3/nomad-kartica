@@ -541,3 +541,21 @@ test('stvarni Remaris normativi i promet: uvoz bez pogreške i zbroj jednak izvj
   const kava = t.articles.find(a => a.name.startsWith('Kava Zadužna'));
   assert.ok(kava.qty_e4 > e4('100') && kava.qty_e4 < e4('200'), 'kava ' + kava.qty_e4);
 });
+
+// ---------- ispis inventure (A4) ----------
+test('ispisna stranica inventure: A4, lista za brojanje i rezultat', () => {
+  const P = require('../inventura/print');
+  const { svc, loc } = simple();
+  const id = svc.createInventory({ name: 'Test ispis', date: '2026-10-15', locationId: loc }, 1);
+  const inv = svc.inventory(id), items = svc.inventoryItems(id), sum = svc.inventorySummary(id);
+  const lista = P.inventoryPrintHtml(inv, items, sum, {});
+  assert.match(lista, /@page\{size:A4/);
+  assert.match(lista, /Inventurna lista/);
+  assert.match(lista, /Pivo 0,5/);
+  assert.match(lista, /Knjižno/);
+  const slijepo = P.inventoryPrintHtml(inv, items, sum, { blind: true });
+  assert.doesNotMatch(slijepo, /<th class="num">Knjižno/);
+  const rez = P.inventoryPrintHtml(inv, items, sum, { mode: 'rezultat' });
+  assert.match(rez, /Neto razlika/);
+  assert.doesNotMatch(P.inventoryPrintHtml({ ...inv, name: '<x>' }, items, sum, {}), /<x>/);
+});
