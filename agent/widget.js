@@ -106,7 +106,8 @@
   function fmt(s) {
     return esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
       .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
-      .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+      // točka, zarez, upitnik… na kraju rečenice NIJE dio linka (inače "Not Found")
+      .replace(/(^|[\s(])(https?:\/\/[^\s<)]*[^\s<).,;:!?'"&])/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
   }
 
   /* ---------- Sučelje ---------- */
