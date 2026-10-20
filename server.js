@@ -387,6 +387,9 @@ app.get('/api/admin/stats', adminAuth, (req, res) => {
   });
 });
 
+// ---------- Vlasnički admin panel (/admin, kratki link /a) ----------
+require('./admin/dashboard').mount(app, { db, cfg: CFG, adminAuth, staffNames: CFG.staff.map(s => s.name) });
+
 app.use((err, req, res, next) => {
   if (err && err.type === 'entity.too.large') return res.status(413).json({ error: 'Fotografija je prevelika. Pokušaj ponovno.' });
   console.error(err); res.status(500).json({ error: 'Greška na serveru.' });
