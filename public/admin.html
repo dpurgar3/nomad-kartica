@@ -6,7 +6,11 @@
 <meta name="theme-color" content="#0B0A08">
 <meta name="robots" content="noindex">
 <title>NOMAd – admin</title>
-<link rel="icon" href="/logo-96.png">
+<link rel="icon" href="/admin-192.png">
+<link rel="manifest" href="/admin.webmanifest">
+<link rel="apple-touch-icon" href="/admin-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NOMAd Admin">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/app.css">
@@ -54,7 +58,7 @@
 <div class="wrap" style="padding-bottom:40px">
   <div class="top">
     <div class="brand"><img src="/logo-192.png" alt="NOMAd Caffe Bar logo"><div><div class="name">NOMAd</div><div class="sub">Admin · kartica vjernosti</div></div></div>
-    <button class="btn ghost sm hidden" id="btnOut" type="button">Odjava</button>
+    <div style="display:flex;gap:8px"><button class="btn sm hidden" id="btnInstall" type="button">Dodaj na početni zaslon</button><button class="btn ghost sm hidden" id="btnOut" type="button">Odjava</button></div>
   </div>
 
   <section id="aLogin" style="display:flex;flex-direction:column;gap:12px;max-width:420px">

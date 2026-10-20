@@ -1,0 +1,17 @@
+{
+  "id": "/admin",
+  "name": "NOMAd Admin – kartica vjernosti",
+  "short_name": "NOMAd Admin",
+  "description": "Statistika kartice vjernosti NOMAd Caffe Bara – gosti, računi, nagrade, osoblje.",
+  "lang": "hr",
+  "start_url": "/admin",
+  "scope": "/admin",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0B0A08",
+  "theme_color": "#0B0A08",
+  "icons": [
+    { "src": "/admin-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/admin-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

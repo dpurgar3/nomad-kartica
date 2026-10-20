@@ -221,5 +221,11 @@
   $('modal').addEventListener('click', e => { if (e.target === $('modal')) $('modal').classList.add('hidden'); });
   document.querySelectorAll('[data-csv]').forEach(b => b.onclick = () => csv(b.dataset.csv));
   setInterval(() => { if (token && !document.hidden && !$('aMain').classList.contains('hidden')) load(); }, 120e3);
+  // instalacija kao zasebna ikona na mobitelu
+  let installEv = null;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEv = e; $('btnInstall').classList.remove('hidden'); });
+  window.addEventListener('appinstalled', () => $('btnInstall').classList.add('hidden'));
+  $('btnInstall').onclick = async () => { if (!installEv) return; installEv.prompt(); await installEv.userChoice.catch(() => {}); installEv = null; $('btnInstall').classList.add('hidden'); };
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
   if (token) enter();
 })();
