@@ -9,6 +9,8 @@ const { createWorker } = require('tesseract.js');
 
 const LANG_PATH = path.join(path.dirname(require.resolve('@tesseract.js-data/eng/package.json')), '4.0.0_best_int');
 
+// OCR (Tesseract) zauzima puno memorije i ne vraća je dok radi. Zato se pokreće tek kad
+// netko skenira račun i gasi se odmah nakon provjere — server ostaje ispod granice memorije.
 let workerPromise = null;
 function getWorker() {
   if (!workerPromise) {
@@ -16,6 +18,12 @@ function getWorker() {
       .catch(e => { workerPromise = null; throw e; });
   }
   return workerPromise;
+}
+async function shutdownWorker() {
+  const p = workerPromise;
+  workerPromise = null;
+  if (!p) return;
+  try { await (await p).terminate(); } catch { /* već ugašen */ }
 }
 
 // ---------- QR ----------
@@ -149,7 +157,8 @@ async function checkReceiptPhoto(buffer, ownOib) {
   const max = 3000, big = Math.max(base.bitmap.width, base.bitmap.height);
   if (big > max) base.scale(max / big);
   const qr = decodeQr(base);
-  const oib = await readOib(base, ownOib);
+  let oib;
+  try { oib = await readOib(base, ownOib); } finally { await shutdownWorker(); }
   if (oib.other && !oib.ours) return { error: 'Ovaj račun nije iz NOMAd-a. Bodove donose samo računi iz NOMAd Caffe Bara.', code: 'foreign' };
   if (!qr) return { error: 'Na fotografiji nisam pronašao QR kod. Slikaj račun izbliza, da QR kod bude oštar. Ako je račun dugačak, presavij srednji dio tako da se vide vrh i QR kod.', code: 'noqr' };
   if (oib.ours) return { qr };
@@ -158,26 +167,47 @@ async function checkReceiptPhoto(buffer, ownOib) {
 }
 
 /**
- * Lagana provjera (QR kod pročita mobitel): samo OIB s fotografije. Malo memorije i procesora.
- * @returns {Promise<{ok:true}|{error:string,code:string}>}
+ * Lagana provjera (QR kod pročita mobitel): samo OIB s fotografije.
+ * Radi u ovom procesu — koristi je receipt-worker.js.
  */
-let busy = Promise.resolve();
-function checkOibPhoto(buffer, ownOib) {
-  // jedna provjera u isto vrijeme (server ima malo memorije)
-  const run = busy.then(async () => {
-    let base;
-    try { base = await Jimp.read(buffer); } catch { return { error: 'Fotografija se ne može otvoriti. Pokušaj ponovno.', code: 'image' }; }
-    const max = 2000, big = Math.max(base.bitmap.width, base.bitmap.height);
-    if (big > max) base.scale(max / big);
-    const oib = await readOib(base, ownOib);
-    base = null;
-    if (oib.ours) return { ok: true };
-    if (oib.other) return { error: 'Ovaj račun nije iz NOMAd-a. Bodove donose samo računi iz NOMAd Caffe Bara.', code: 'foreign' };
-    return { error: 'Ne vidim OIB na vrhu računa. Slikaj cijeli račun, od naziva lokala do QR koda, da sve bude oštro.', code: 'nooib' };
-  });
-  busy = run.catch(() => {});
-  const timeout = new Promise(res => setTimeout(() => res({ error: 'Provjera traje predugo. Pokušaj ponovno.', code: 'timeout' }), 40000));
-  return Promise.race([run, timeout]);
+async function checkOibPhotoLocal(buffer, ownOib) {
+  let base;
+  try { base = await Jimp.read(buffer); } catch { return { error: 'Fotografija se ne može otvoriti. Pokušaj ponovno.', code: 'image' }; }
+  const max = 2000, big = Math.max(base.bitmap.width, base.bitmap.height);
+  if (big > max) base.scale(max / big);
+  let oib;
+  try { oib = await readOib(base, ownOib); } finally { base = null; await shutdownWorker(); }
+  if (oib.ours) return { ok: true };
+  if (oib.other) return { error: 'Ovaj račun nije iz NOMAd-a. Bodove donose samo računi iz NOMAd Caffe Bara.', code: 'foreign' };
+  return { error: 'Ne vidim OIB na vrhu računa. Slikaj cijeli račun, od naziva lokala do QR koda, da sve bude oštro.', code: 'nooib' };
 }
 
-module.exports = { checkReceiptPhoto, checkOibPhoto, findOib, validOib, getWorker, decodeQr };
+/**
+ * Provjera OIB-a u zasebnom, kratkotrajnom procesu. OCR troši 300–400 MB, a Node tu memoriju
+ * ne vraća dok proces radi; kad se pomoćni proces ugasi, sva se memorija oslobodi.
+ * Jedna provjera u isto vrijeme; nakon 40 s proces se prekida.
+ * @returns {Promise<{ok:true}|{error:string,code:string}>}
+ */
+const { fork } = require('child_process');
+const WORKER_FILE = path.join(__dirname, 'receipt-worker.js');
+const TIMEOUT_MS = 40000;
+let busy = Promise.resolve();
+function runInChild(buffer, ownOib) {
+  return new Promise(resolve => {
+    let done = false;
+    const finish = (r) => { if (done) return; done = true; clearTimeout(timer); try { child.kill('SIGKILL'); } catch {} resolve(r); };
+    const child = fork(WORKER_FILE, [], { execArgv: ['--max-old-space-size=200'], env: { ...process.env, MALLOC_ARENA_MAX: '2' }, stdio: ['ignore', 'inherit', 'inherit', 'ipc'] });
+    const timer = setTimeout(() => finish({ error: 'Provjera traje predugo. Pokušaj ponovno.', code: 'timeout' }), TIMEOUT_MS);
+    child.on('message', m => finish(m && typeof m === 'object' ? m : { error: 'Greška pri provjeri računa. Pokušaj ponovno.', code: 'worker' }));
+    child.on('error', () => finish({ error: 'Greška pri provjeri računa. Pokušaj ponovno.', code: 'worker' }));
+    child.on('exit', () => finish({ error: 'Greška pri provjeri računa. Pokušaj ponovno.', code: 'worker' }));
+    child.send({ image: buffer.toString('base64'), oib: ownOib });
+  });
+}
+function checkOibPhoto(buffer, ownOib) {
+  const run = busy.then(() => runInChild(buffer, ownOib));
+  busy = run.catch(() => {});
+  return run;
+}
+
+module.exports = { checkReceiptPhoto, checkOibPhoto, checkOibPhotoLocal, findOib, validOib, getWorker, shutdownWorker, decodeQr };

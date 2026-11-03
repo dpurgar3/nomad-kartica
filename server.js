@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const express = require('express');
 const Database = require('better-sqlite3');
 const QRCode = require('qrcode');
-const { checkOibPhoto, getWorker } = require('./receipt-check');
+const { checkOibPhoto } = require('./receipt-check');
 
 // ---------- Postavke (.env) ----------
 loadEnv(path.join(__dirname, '.env'));
@@ -397,6 +397,5 @@ app.use((err, req, res, next) => {
 
 if (require.main === module) {
   app.listen(CFG.port, () => console.log(`NOMAd kartica radi na http://localhost:${CFG.port}`));
-  getWorker().then(() => console.log('Čitač računa (OCR) je spreman.')).catch(e => console.error('OCR se nije pokrenuo:', e));
 }
 module.exports = { app, parseReceipt, zagrebLocalToDate };
