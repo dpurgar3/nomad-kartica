@@ -2,7 +2,7 @@
 (function () {
   const $ = id => document.getElementById(id);
   const VIEWS = ['vRegister', 'vLogin', 'vCard', 'vScan', 'vDone', 'vReward', 'vProfile'];
-  let cfg = { pointsPerReceipt: 10, rewardPoints: 50, rewardName: 'Velika kava s mlijekom + kroasan', wifiSsid: 'ASUS - NOMAd', wifiPassword: '', maxReceiptsPerDay: 1 };
+  let cfg = { pointsPerReceipt: 10, rewardPoints: 50, rewardName: 'Velika kava s mlijekom + kroasan', wifiSsid: 'ASUS - NOMAd', wifiPassword: '', maxReceiptsPerDay: 1, receiptMaxAgeMinutes: 30 };
   let me = null;
   let scanner = null, scanBusy = false;
 
@@ -108,6 +108,12 @@
     document.querySelectorAll('.ssid').forEach(e => e.textContent = cfg.wifiSsid);
     document.querySelectorAll('.rname').forEach(e => e.textContent = cfg.rewardName);
     $('maxDay').textContent = cfg.maxReceiptsPerDay;
+    const ageMin = cfg.receiptMaxAgeMinutes || 30;
+    const ageTxt = ageMin % 60 === 0
+      ? (ageMin / 60) + (ageMin === 60 ? ' sat' : ' sata')
+      : ageMin + (ageMin === 1 ? ' minutu' : (ageMin >= 2 && ageMin <= 4 ? ' minute' : ' minuta'));
+    const ageEl = $('ageNote');
+    if (ageEl) ageEl.innerHTML = 'Račun vrijedi <b>' + ageTxt + '</b> od izdavanja.';
     if (cfg.address) $('addr').textContent = cfg.address;
     $('wifiPw').textContent = cfg.wifiPassword || 'Pitaj konobara';
     $('wifiCopy').classList.toggle('hidden', !cfg.wifiPassword);

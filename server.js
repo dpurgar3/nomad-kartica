@@ -26,7 +26,8 @@ const CFG = {
   rewardName: process.env.REWARD_NAME || 'Velika kava s mlijekom + kroasan',
   rewardValidDays: int(process.env.REWARD_VALID_DAYS, 30),
   maxReceiptsPerDay: int(process.env.MAX_RECEIPTS_PER_DAY, 1),
-  receiptMaxAgeHours: int(process.env.RECEIPT_MAX_AGE_HOURS, 48),
+  // Račun se priznaje samo ako je izdan unutar ovog broja minuta (30 = pola sata).
+  receiptMaxAgeMinutes: int(process.env.RECEIPT_MAX_AGE_MINUTES, 30),
   minReceiptCents: int(process.env.MIN_RECEIPT_CENTS, 0),
   address: process.env.ADDRESS || 'Kulturni centar Ivan Rabuzin, Novi Marof',
   // OIB izdavatelja: bodove donose samo računi na kojima je otisnut ovaj OIB (Ugostiteljski obrt Artist)
@@ -136,6 +137,24 @@ function rewardCode() {
   return `NMD-${pick(4)}-${pick(4)}`;
 }
 
+// Koliko dugo nakon izdavanja račun još vrijedi, slovima (npr. 30 -> "30 minuta", 60 -> "1 sat").
+function maxAgeLabel(min = CFG.receiptMaxAgeMinutes) {
+  if (min % 60 === 0) {
+    const h = min / 60;
+    return `${h} ${h === 1 ? 'sat' : (h >= 2 && h <= 4 ? 'sata' : 'sati')}`;
+  }
+  return `${min} ${min === 1 ? 'minutu' : (min >= 2 && min <= 4 ? 'minute' : 'minuta')}`;
+}
+
+// Vraća poruku ako račun ne prolazi provjeru vremena izdavanja, inače null.
+function receiptAgeError(when, now = Date.now()) {
+  const ageMs = now - when.getTime();
+  if (ageMs < -3600e3) return 'Datum na računu nije ispravan.';
+  if (ageMs > CFG.receiptMaxAgeMinutes * 60e3)
+    return `Račun je izdan prije više od ${maxAgeLabel()}. Bodove dobivaš samo za račune skenirane odmah nakon plaćanja.`;
+  return null;
+}
+
 // Fiskalni račun (HR): QR kod sadrži poveznicu za provjeru računa u Poreznoj upravi,
 // npr. https://porezna.gov.hr/rn?jir=…&datv=20261008_1842&izn=400 (ili zki= umjesto jir=).
 function parseReceipt(text) {
@@ -208,6 +227,7 @@ app.get('/api/config', (req, res) => res.json({
   wifiSsid: CFG.wifiSsid, wifiPassword: CFG.wifiPassword, pointsPerReceipt: CFG.pointsPerReceipt,
   rewardPoints: CFG.rewardPoints, rewardName: CFG.rewardName, rewardValidDays: CFG.rewardValidDays,
   maxReceiptsPerDay: CFG.maxReceiptsPerDay, address: CFG.address,
+  receiptMaxAgeMinutes: CFG.receiptMaxAgeMinutes,
 }));
 
 app.post('/api/register', limit('reg', 5, 3600e3), (req, res) => {
@@ -241,14 +261,12 @@ app.post('/api/scan', express.json({ limit: '6mb' }), auth, limit('scan', 20, 36
   const r = parseReceipt(req.body.qr);
   if (r.error) return res.status(400).json({ error: r.error });
   const now = Date.now();
-  // prvo OIB (je li račun iz NOMAd-a), zatim ostala pravila (već iskorišten, 1 dnevno)
-  if (now - r.when.getTime() <= CFG.receiptMaxAgeHours * 3600e3 && r.when.getTime() <= now + 3600e3) {
-    const oib = await checkOibPhoto(Buffer.from(m[2], 'base64'), CFG.oib);
-    if (oib.error) return res.status(400).json({ error: oib.error, code: oib.code });
-  }
-  if (r.when.getTime() > now + 3600e3) return res.status(400).json({ error: 'Datum na računu nije ispravan.' });
-  if (now - r.when.getTime() > CFG.receiptMaxAgeHours * 3600e3)
-    return res.status(400).json({ error: `Račun je stariji od ${CFG.receiptMaxAgeHours} sati. Skeniraj račun odmah nakon plaćanja.` });
+  // Najprije vrijeme izdavanja (jeftina provjera), pa OIB na fotografiji.
+  // Račun vrijedi samo kratko nakon izdavanja (30 min) – sprječava skupljanje starih/tuđih računa.
+  const ageErr = receiptAgeError(r.when, now);
+  if (ageErr) return res.status(400).json({ error: ageErr });
+  const oib = await checkOibPhoto(Buffer.from(m[2], 'base64'), CFG.oib);
+  if (oib.error) return res.status(400).json({ error: oib.error, code: oib.code });
   if (CFG.minReceiptCents && r.amountCents != null && r.amountCents < CFG.minReceiptCents)
     return res.status(400).json({ error: `Za bodove račun mora biti barem ${(CFG.minReceiptCents / 100).toFixed(2).replace('.', ',')} €.` });
   if (db.prepare('SELECT 1 FROM receipts WHERE receipt_key=?').get(r.key))
@@ -398,4 +416,4 @@ app.use((err, req, res, next) => {
 if (require.main === module) {
   app.listen(CFG.port, () => console.log(`NOMAd kartica radi na http://localhost:${CFG.port}`));
 }
-module.exports = { app, parseReceipt, zagrebLocalToDate };
+module.exports = { app, parseReceipt, receiptAgeError, maxAgeLabel, zagrebLocalToDate };

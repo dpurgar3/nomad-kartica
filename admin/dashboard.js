@@ -158,7 +158,7 @@ function buildDashboard(db, cfg, staffNames, q) {
   return {
     generated: now.toISOString(), from, to, today,
     rules: { pointsPerReceipt: cfg.pointsPerReceipt, rewardPoints: cfg.rewardPoints, rewardName: cfg.rewardName,
-      rewardValidDays: cfg.rewardValidDays, maxReceiptsPerDay: cfg.maxReceiptsPerDay, receiptMaxAgeHours: cfg.receiptMaxAgeHours },
+      rewardValidDays: cfg.rewardValidDays, maxReceiptsPerDay: cfg.maxReceiptsPerDay, receiptMaxAgeMinutes: cfg.receiptMaxAgeMinutes },
     totals: {
       guests: users.length, guestsStaff: users.filter(isStaff).length, scans: receipts.length, rewards: rewards.length,
       rewardStates, pointsOutstanding: totalPointsOut, canClaim, nearReward, inactive30, neverScanned,

@@ -59,7 +59,7 @@ Ostale mogućnosti:
 | `REWARD_NAME` | Velika kava s mlijekom + kroasan | Naziv nagrade |
 | `REWARD_VALID_DAYS` | 30 | Koliko dana vrijedi kod nagrade |
 | `MAX_RECEIPTS_PER_DAY` | 1 | Najviše računa po gostu dnevno |
-| `RECEIPT_MAX_AGE_HOURS` | 48 | Do koliko sati nakon izdavanja se račun može skenirati |
+| `RECEIPT_MAX_AGE_MINUTES` | 30 | Do koliko minuta nakon izdavanja se račun može skenirati (30 = pola sata) |
 | `MIN_RECEIPT_CENTS` | 0 | Najmanji iznos računa za bodove (u centima) |
 | `NOMAD_OIB` | 53253782263 | OIB koji mora biti na računu da bi se dodali bodovi |
 
@@ -77,7 +77,7 @@ Bodove odbija ako:
 - račun nije iz NOMAd-a (na računu je drugi OIB ili se OIB ne vidi),
 - je isti račun već iskorišten (svaki JIR vrijedi samo jednom),
 - je gost danas već skenirao račun (najviše 1 dnevno),
-- je račun stariji od 48 sati.
+- je račun stariji od 30 minuta (račun vrijedi samo ako se skenira odmah nakon plaćanja).
 
 Ako se pravi NOMAd račun ne uspije pročitati (zgužvan, mutan), konobar može dodati bodove ručno na `/osoblje`.
 

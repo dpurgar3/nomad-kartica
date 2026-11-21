@@ -117,7 +117,7 @@
     const r = D.rules;
     $('rules').innerHTML = [
       ['Bodova po računu', r.pointsPerReceipt], ['Bodova za nagradu', r.rewardPoints], ['Nagrada', r.rewardName],
-      ['Vrijedi', r.rewardValidDays + ' dana'], ['Računa dnevno po gostu', r.maxReceiptsPerDay], ['Najstariji račun', r.receiptMaxAgeHours + ' h'],
+      ['Vrijedi', r.rewardValidDays + ' dana'], ['Računa dnevno po gostu', r.maxReceiptsPerDay], ['Najstariji račun', r.receiptMaxAgeMinutes >= 60 ? (r.receiptMaxAgeMinutes / 60) + ' h' : r.receiptMaxAgeMinutes + ' min'],
     ].map(([a, b]) => `<div class="item"><div class="a">${esc(a)}</div><div class="p">${esc(b)}</div></div>`).join('');
     renderGuests(); renderRewards(); renderStaff(); renderFeed();
   }

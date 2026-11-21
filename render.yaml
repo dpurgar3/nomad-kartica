@@ -21,3 +21,5 @@ services:
         sync: false
       - key: WIFI_SSID
         value: ASUS - NOMAd
+      - key: RECEIPT_MAX_AGE_MINUTES
+        value: "30"
