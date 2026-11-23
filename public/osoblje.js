@@ -65,7 +65,7 @@
     if (scanner) return stopCam();
     $('reader').classList.remove('hidden'); $('btnCam').textContent = 'Zatvori kameru';
     try {
-      const mk = () => new Html5Qrcode('reader', { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], useBarCodeDetectorIfSupported: true, verbose: false });
+      const mk = () => new Html5Qrcode('reader', { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], useBarCodeDetectorIfSupported: false, verbose: false });
       let busy = false;
       const onOk = async text => { if (busy) return; busy = true; await redeem(text); stopCam(); };
       // veliki okvir za čitanje (QR s ekrana mobitela gosta) i viša razlučivost kamere
@@ -81,6 +81,23 @@
       }
     } catch { $('redeemErr').textContent = 'Kamera nije dostupna.'; stopCam(); }
   };
+  // rezerva: fotografiraj kod gosta kamerom mobitela pa ga pročitaj sa slike
+  (function () {
+    const cam = $('btnCam'); if (!cam || !cam.parentNode) return;
+    const lab = document.createElement('label'); lab.className = 'btn ghost'; lab.style.cssText = 'cursor:pointer;margin-top:8px';
+    lab.appendChild(document.createTextNode('Ili fotografiraj kod gosta'));
+    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.setAttribute('capture', 'environment'); inp.hidden = true;
+    lab.appendChild(inp); cam.parentNode.insertBefore(lab, cam.nextSibling);
+    inp.addEventListener('change', async () => {
+      const f = inp.files && inp.files[0]; inp.value = ''; if (!f) return;
+      $('redeemOk').textContent = ''; $('redeemErr').textContent = 'Čitam sliku…';
+      try {
+        const q = new Html5Qrcode('reader', { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], useBarCodeDetectorIfSupported: false, verbose: false });
+        const text = await q.scanFile(f, false);
+        $('redeemErr').textContent = ''; await redeem(text);
+      } catch { $('redeemErr').textContent = 'Na slici nisam našao QR kod. Slikaj izbliza ili upiši kod ručno.'; }
+    });
+  })();
   $('fFind').addEventListener('submit', async ev => {
     ev.preventDefault(); $('ptsOk').textContent = ''; $('ptsErr').textContent = ''; $('guest').classList.add('hidden');
     try {
