@@ -65,11 +65,20 @@
     if (scanner) return stopCam();
     $('reader').classList.remove('hidden'); $('btnCam').textContent = 'Zatvori kameru';
     try {
-      scanner = new Html5Qrcode('reader', { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], verbose: false });
+      const mk = () => new Html5Qrcode('reader', { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], useBarCodeDetectorIfSupported: true, verbose: false });
       let busy = false;
-      await scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: 220 }, async text => {
-        if (busy) return; busy = true; await redeem(text); stopCam();
-      }, () => {});
+      const onOk = async text => { if (busy) return; busy = true; await redeem(text); stopCam(); };
+      // veliki okvir za čitanje (QR s ekrana mobitela gosta) i viša razlučivost kamere
+      const box = (w, h) => { const s = Math.floor(Math.min(w, h) * 0.85); return { width: s, height: s }; };
+      scanner = mk();
+      try {
+        await scanner.start({ facingMode: 'environment' }, { fps: 15, qrbox: box, videoConstraints: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } }, onOk, () => {});
+      } catch {
+        // rezerva: jednostavna postavka kamere (kao prije)
+        try { scanner.clear(); } catch {}
+        scanner = mk();
+        await scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: box }, onOk, () => {});
+      }
     } catch { $('redeemErr').textContent = 'Kamera nije dostupna.'; stopCam(); }
   };
   $('fFind').addEventListener('submit', async ev => {
